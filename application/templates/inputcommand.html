@@ -1,0 +1,18 @@
+{% extends 'navbar.html'%}
+
+{% block body %}
+<div class="container"></div>
+
+<div>
+  <h1>Hello, world!</h1>
+  <h2>HTML Forms</h2>
+
+  <form action = "/outputcommand" method = "POST">
+    <label for="inputcommand">Input Command:</label><br>
+    <input type="text" id="inputcommand" name="inputcommand" value=""><br>
+    <input type="submit" value="Submit">
+  </form> 
+  
+  <p>If you click the "Submit" button, the form-data will be sent to a page called "/printcommand.html".</p>
+</div>
+{% endblock %}
