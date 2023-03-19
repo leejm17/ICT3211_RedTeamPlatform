@@ -2,115 +2,6 @@
 
 {% block body %}
 <head>
-    <title>Flask-SocketIO Test</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
-    <script type="text/javascript" charset="utf-8">
-
-        
-        // https://softauthor.com/javascript-dynamic-html-select-drop-down/
-        // https://www.javatpoint.com/how-to-create-dropdown-list-using-javascript
-        function favTutorial() {
-
-            const cardTitle = document.getElementById("card-title-3");  
-            const cardText = document.getElementById("card-text-3"); 
-            
-            var mylist = document.getElementById("script-dropdown");
-            document.getElementById("favourite").value = mylist.options[mylist.selectedIndex].text;
-
-            console.log("HI")
-            cardTitle.innerHTML  = mylist.options[mylist.selectedIndex].text;
-            cardText.innerHTML  =  "A script to run " + mylist.options[mylist.selectedIndex].text + " would be executed";
-            
-            const script3 = document.getElementById("script3");
-            script3.value = mylist.options[mylist.selectedIndex].text
-            
-        }
-        
-        $(document).ready(function(){
-           
-            $('#script1').click(function(event) {
-                event.preventDefault()
-                console.log("NYE");
-                var socket = io.connect('http://' + document.domain + ':' + location.port + '/test' , { query: {name: "Test"} });
-                //io.connect('http://' + document.domain + ':' + location.port + '/test');
-                //receive details from server
-                var numbers_received = [];
-                socket.on('newnumber', function(msg) {
-                    console.log("Received message: " + msg.number);
-                    //maintain a list of ten numbers
-                    if (numbers_received.length >= 10){
-                        numbers_received.shift()
-                    }
-                    numbers_received.push(msg.number);
-                    numbers_string = '';
-                    for (var i = 0; i < numbers_received.length; i++){
-                        numbers_string = numbers_string + '<p>' + numbers_received[i].toString() + '</p>';
-                    }
-                    $('#log').html(numbers_string);
-                });
-            });
-
-
-            $('#sshscript').click(function(event) {
-                event.preventDefault()
-                console.log("NYE2");
-                var socket = io.connect('http://' + document.domain + ':' + location.port + '/ssh');
-                //io.connect('http://' + document.domain + ':' + location.port + '/test');
-                //receive details from server
-                var numbers_received = [];
-                socket.on('newnumber', function(msg) {
-                    console.log("Received message: " + msg.number);
-                    //maintain a list of ten numbers
-                    if (numbers_received.length >= 10){
-                        numbers_received.shift()
-                    }
-                    numbers_received.push(msg.number);
-                    numbers_string = '';
-                    for (var i = 0; i < numbers_received.length; i++){
-                        numbers_string = numbers_string + '<p>' + numbers_received[i].toString() + '</p>';
-                    }
-                    $('#sshlog').html(numbers_string);
-                });
-            });
-
-
-            $('#script3').click(function(event) {
-                event.preventDefault()
-                console.log("NYE3");
-                const script3 = document.getElementById("script3");
-                console.log(script3.value);
-                console.log("NYE3");
-                var numbers_received = ["hi", "bye"];
-                var socket = io.connect('http://' + document.domain + ':' + location.port + '/test' , { query: "foo="+ numbers_received } );
-                
-            });
-
-
-            const scriptDropDown = document.getElementById("script-dropdown");
-            $.ajax({
-                url:"/getshfiles",
-                success: function(resp) {
-                    console.log(resp)
-                    var ddl = document.getElementById('ddl-id');
-                    for (let key in resp) {
-                        let option = document.createElement("option");
-                        option.setAttribute('value', resp[key]);
-                        scriptDropDown.appendChild(option);
-
-                        let optionText = document.createTextNode(resp[key]);
-                        option.appendChild(optionText);
-                        
-                    }
-                }
-            });
-
-                        
-            
-        });
-
-    </script>
-
     <meta name="viewport" content=
     "width=device-width, initial-scale=1">
   
@@ -120,6 +11,10 @@
             border-spacing: 0;
             width: 100%;
             border: 0px solid #ddd;
+        }
+
+        table, th, td {
+            border: 1px solid black;
         }
           
         th,
@@ -154,171 +49,433 @@
             padding: 5px;
             margin-top: 5px;
             width: 100%;
-            height: 100px;
+            height: 300px;
             overflow-y: scroll;
         }
-    </style>
-</head>
 
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+        
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+    </style>
+
+    <title>Flask-SocketIO Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf-8">
+        
+        // https://softauthor.com/javascript-dynamic-html-select-drop-down/
+        // https://www.javatpoint.com/how-to-create-dropdown-list-using-javascript
+        var fileDescription
+        function selectAttack() {
+
+            // Clear text in scroll text element 
+            // when user selects new .sh file from dropdown menu
+            const outputElement = document.getElementById("testoutput");
+            outputElement.innerHTML='';
+
+            // Reset vulnerability and Success/Failure values 
+            // when user selects new .sh file from dropdown menu
+            const executionSuccessElement = document.getElementById("execution-success");
+            executionSuccessElement.innerHTML='';
+            const executionFailureElement = document.getElementById("execution-failure");
+            executionFailureElement.innerHTML='';
+            const attackTypeElement = document.getElementById("attack-type");
+            attackTypeElement.innerHTML='';
+
+
+            // Change title text and description text in card element
+            // when user selects new .sh file from dropdown menu 
+            const cardTitle = document.getElementById("card-title-3");  
+            const cardText = document.getElementById("card-text-3");
+
+            // Get the dictionary key selected by user from the dropdown menu,
+            var mylist = document.getElementById("script-dropdown");
+            document.getElementById("favourite").value = mylist.options[mylist.selectedIndex].text;
+
+            // Get the values of the dictionary key selected by user
+            var attackDescription = fileDescription[document.getElementById("favourite").value]
+            
+            cardTitle.innerHTML  = mylist.options[mylist.selectedIndex].text;
+            cardText.innerHTML  =  attackDescription[0];
+            attackTypeElement.innerHTML = attackDescription[1];
+            
+        }
+
+        function getStatuses() {
+            // code to be executed
+            var statusSocket = io.connect('http://' + document.domain + ':' + location.port + '/statuses' , {pingTimeout: 120000, pingInterval: 120000});
+            statusSocket.pingInterval = 120000
+            statusSocket.pingTimeout = 120000
+
+            // console.log(socket)
+            // console.log("Start-connection button pressed." + socket.disconnected);
+
+            var socketStatusElement = document.getElementById("statuses-socket-connection-status");
+            socketStatusElement.innerHTML = 'Statuses Socket Connection status is: On'
+
+            statusSocket.on('statusoutput', function(msg) {
+                console.log(msg)
+                console.log(msg.number)
+                if (msg.number == "Ok."){
+                    statusSocket.disconnect()
+                    var socketStatusElement = document.getElementById("statuses-socket-connection-status");
+                    socketStatusElement.innerHTML = 'Statuses Socket Connection status is: Off'
+                    // console.log("Socket status after success/ok is: " + socket.disconnected);
+                }
+                else{
+                    statusesDictionary = msg.number
+                    for (let key in statusesDictionary) {
+                        console.log(key)
+                        console.log(statusesDictionary[key])
+                        var statusesTableElement = document.getElementById(key);
+                        console.log(statusesTableElement)
+                        statusesTableElement.innerHTML = statusesDictionary[key]
+                    }
+                }
+            });
+        }
+        
+        $(document).ready(function(){
+
+            $('#get-statuses').click(function(event) {
+                event.preventDefault()
+                getStatuses()
+
+                // var statusSocket = io.connect('http://' + document.domain + ':' + location.port + '/statuses' , {pingTimeout: 120000, pingInterval: 120000});
+                // statusSocket.pingInterval = 120000
+                // statusSocket.pingTimeout = 120000
+
+                // // console.log(socket)
+                // // console.log("Start-connection button pressed." + socket.disconnected);
+
+                // var socketStatusElement = document.getElementById("statuses-socket-connection-status");
+                // socketStatusElement.innerHTML = 'Statuses Socket Connection status is: On'
+
+                // statusSocket.on('statusoutput', function(msg) {
+                //     console.log(msg)
+                //     console.log(msg.number)
+                //     if (msg.number == "Ok."){
+                //         statusSocket.disconnect()
+                //         var socketStatusElement = document.getElementById("statuses-socket-connection-status");
+                //         socketStatusElement.innerHTML = 'Statuses Socket Connection status is: Off'
+                //         // console.log("Socket status after success/ok is: " + socket.disconnected);
+                //     }
+                //     else{
+                //         statusesDictionary = msg.number
+                //         for (let key in statusesDictionary) {
+                //             console.log(key)
+                //             console.log(statusesDictionary[key])
+                //             var statusesTableElement = document.getElementById(key);
+                //             console.log(statusesTableElement)
+                //             statusesTableElement.innerHTML = statusesDictionary[key]
+                //         }
+                //     }
+                    
+                // });
+
+                // $('#status-stop-connection').click(function(event) {
+                //     event.preventDefault();
+                //     statusSocket.disconnect()
+                //     var socketStatusElement = document.getElementById("statuses-socket-connection-status");
+                //     socketStatusElement.innerHTML = 'Statuses Socket Connection status is: Off'
+                //     console.log(statusSocket)
+                //     console.log("statuses-stop-connection button pressed." + statusSocket.disconnected);
+                // });
+                // // console.log("Console Done: " );
+            });
+
+
+            $('#execute-script').click(function(event) {
+                event.preventDefault()
+                
+                // *TO NOTE* Get the file name submitted by the user with the id of "favourite" 
+                var fileName = document.getElementById("favourite").value
+                // console.log(fileName);
+                
+                // Initilaize and establish a socket session to /test Python Flask route and run code within the route 
+                var socket = io.connect('http://' + document.domain + ':' + location.port + '/test' , { query: "file="+ fileName }, {pingTimeout: 120000, pingInterval: 120000});
+                socket.pingInterval = 120000
+                socket.pingTimeout = 120000
+                
+                console.log("Start-connection button pressed." + socket.disconnected);
+                console.log(socket)
+                
+                // Change the socket status diplayed to user from Off to On 
+                var socketStatusElement = document.getElementById("socket-connection-status");
+                socketStatusElement.innerHTML = 'Socket Connection status is: On'
+
+                // Initialize socket listener listen for emit from socket with the same _____name from the Python Flask server
+                socket.on('scriptoutput', function(msg) {
+
+                    // "number" is the dictionary key and the msg.number gets te value in the number
+                    // in '/test' Python Flask Route
+                    console.log("Received message: " + msg.number);
+                    console.log(socket)
+
+                    // If browser recieves Success in the data, print checkmark to user
+                    // and disconnect client from server
+                    if (msg.number == "Success" || msg.number == "Ok."){
+                        executionsuccessElement=document.getElementById("execution-success");
+                        executionsuccessElement.innerHTML='&#10004;';
+                        
+                        socket.disconnect()
+                        var socketStatusElement = document.getElementById("socket-connection-status");
+                        socketStatusElement.innerHTML = 'Socket Connection status is: Off'
+                        console.log("Socket status after success/ok is: " + socket.disconnected);
+
+                        getStatuses();
+                    }
+                    else if (msg.number == "Fail.") {
+                        executionsuccessElement=document.getElementById("execution-failure");
+                        executionsuccessElement.innerHTML='&#10060;';
+                        
+                        socket.disconnect()
+                        var socketStatusElement = document.getElementById("socket-connection-status");
+                        socketStatusElement.innerHTML = 'Socket Connection status is: Off'
+                        console.log("Socket status after success/ok is: " + socket.disconnected);
+
+                    }
+
+                    // Create a <p> element and append value of msg.number into <p> element 
+                    let paragraphElement = document.createElement("p");
+                    let paragraphText = document.createTextNode(msg.number);
+                    paragraphElement.appendChild(paragraphText)
+                    // Constantly append <p> element created to scrollable textbox with the id of "testoutput" 
+                    testoutputElement=document.getElementById("testoutput");
+                    testoutputElement.appendChild(paragraphElement);
+
+                    // console.log("testoutput value is: " + testoutput.value)
+
+                });
+
+                // Disconnect socket when button with id of "stop-connection" is clicked
+                $('#stop-connection').click(function(event) {
+                    event.preventDefault();
+                    socket.disconnect()
+                    // Change the socket status diplayed to user from On to Off
+                    var socketStatusElement = document.getElementById("socket-connection-status");
+                    socketStatusElement.innerHTML = 'Socket Connection status is: Off'
+                    console.log("stop-connection button pressed." + socket.disconnected);
+                    console.log(socket)
+                });
+
+                // console.log("Console Done: " );
+                
+            });
+
+            // Get a list of sh file from the file system through /getshfiles Python Flask Route
+            // and append them into the the dropdown menu
+            const scriptDropDown = document.getElementById("script-dropdown");
+            $.ajax({
+                url:"/getshfiles",
+                success: function(resp) {
+                    var ddl = document.getElementById('ddl-id');
+                    fileDescription = resp
+                    for (let key in resp) {
+                        let option = document.createElement("option");
+                        option.setAttribute('value', key);
+                        scriptDropDown.appendChild(option);
+
+                        let optionText = document.createTextNode(key);
+                        option.appendChild(optionText);
+                    }
+                }
+            });
+
+        });
+
+    </script>
+    
+</head>
 
 <!--Page content-->
 <div class="container mt-5">
+    <h2 class="title">Statuses </h2>
 
-    <div class="row">
+    <div class="table-responsive">
+        <table class="table">
+            <tr>
+                <th style="text-align:center;">Firewall Domain Profile is:  </th>
+                <th id="domainprofilesettings" style="text-align:center;">Off</th>
 
-        <div class="col-sm-6">
-            <div class="card">
+                <th style="text-align:center;">Windows Defender status is:  </th>
+                <th id="antivirusenabled" style="text-align:center;">Off</th>
+            </tr> 
+            <tr>
+                <th style="text-align:center;">Firewall Private Profile is:  </th>
+                <th id="privateprofilesettings" style="text-align:center;">Off</th>
+                
+                <th style="text-align:center;">Kepserver status is:  </th>
+                <th id="status" style="text-align:center;">Off</th>
+            </tr>
+            <tr>
+                <th style="text-align:center;">Firewall Public Profile is:  </th>
+                <th id="publicprofilesettings" style="text-align:center;">Off</th>
+                <th style="text-align:center;">  </th>
+                <th style="text-align:center;"> </th>
+            </tr>   
+        </table>
+    </div>
+
+    <h2 class="title">Statuses </h2>
+    <div class="col-sm-6">
+        <p id = "statuses-socket-connection-status"> Statuses Socket Connection status is: Off  </p>
+    </div>
+    <div id="accordion">
+
+        <div class="card">
+          <div class="card-header">
+            <a class="btn" data-bs-toggle="collapse" href="#collapseOne">
+              Get statuses
+            </a>
+          </div>
+          <div id="collapseOne" class="collapse show" data-bs-parent="#accordion">
             <div class="card-body">
-                <h5 class="card-title">Script Number 1</h5>
-                <p class="card-text">This script would demostrate the reconnaisance of the internal network</p>
-                <form>
-                    <a href=# id=script1><button class='btn btn-primary'>Execute</button></a>
-                </form>
+                <h5 class="card-title" id = "card-title">Statuses</h5>
+                <p class="card-text" id = "card-text">This card is for getting status of various things</p>
+                <button id ="get-statuses" class='btn btn-primary'>Get-statuses</button>
+                <button id ="status-stop-connection" class='btn btn-primary'>Stop Status Socket Connection</button>
             </div>
-            </div>
+          </div>
         </div>
-
-        <div class="scroll col-sm-6" id = "log" class="scroll">
-            <p>
-                With the idea of imparting programming 
-                knowledge, Mr. Sandeep Jain, an IIT 
-                Roorkee alumnus started a dream, 
-                GeeksforGeeks. Whether programming 
-                excites you or you feel stifled, 
-                wondering how to prepare for interview 
-                questions or how to ace data structures 
-                and algorithms, GeeksforGeeks is a 
-                one-stop solution. With every tick of 
-                time, we are adding arrows in our quiver.
-                From articles on various computer 
-                science subjects to programming problems 
-                for practice, from basic to premium courses,
-                from technologies to entrance examinations, 
-                we have been building ample content with 
-                superior quality. 
-            </p>
-        </div>
-
     </div>
+      
 
-    <div class="row">
-
+    <!-- <h2 class="title">Statuses </h2>
+    <div class="row" >
         <div class="col-sm-6">
             <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Script Number 2</h5>
-                <p class="card-text">This script would demostrate an SSH test script</p>
-                <form>
-                    <a href=# id=sshscript><button class='btn btn-primary'>Start Recon</button></a>
-                </form>
-            </div>
+                <div class="card-body" id = "card-body-3">
+                    <h5 class="card-title" id = "card-title">Statuses</h5>
+                    <p class="card-text" id = "card-text">This card is for getting status of various things</p>
+                    <button id ="get-statuses" class='btn btn-primary'>Get-statuses</button>
+                    <button id ="status-stop-connection" class='btn btn-primary'>Stop Status Socket Connection</button>
+                </div>
             </div>
         </div>
+        <div class="col-sm-6">
+            <p id = "statuses-socket-connection-status"> Statuses Socket Connection status is: Off  </p>
+        </div>
+    </div> -->
 
-        <div class="scroll col-sm-6" id = "sshlog">
-            <p>
-                With the idea of imparting programming 
-                knowledge, Mr. Sandeep Jain, an IIT 
-                Roorkee alumnus started a dream, 
-                GeeksforGeeks. Whether programming 
-                excites you or you feel stifled, 
-                wondering how to prepare for interview 
-                questions or how to ace data structures 
-                and algorithms, GeeksforGeeks is a 
-                one-stop solution. With every tick of 
-                time, we are adding arrows in our quiver.
-                From articles on various computer 
-                science subjects to programming problems 
-                for practice, from basic to premium courses,
-                from technologies to entrance examinations, 
-                we have been building ample content with 
-                superior quality.With the idea of imparting programming 
-                knowledge, Mr. Sandeep Jain, an IIT 
-                Roorkee alumnus started a dream, 
-                GeeksforGeeks. Whether programming 
-                excites you or you feel stifled, 
-                wondering how to prepare for interview 
-                questions or how to ace data structures 
-                and algorithms, GeeksforGeeks is a 
-                one-stop solution. With every tick of 
-                time, we are adding arrows in our quiver.
-                From articles on various computer 
-                science subjects to programming problems 
-                for practice, from basic to premium courses,
-                from technologies to entrance examinations, 
-                we have been building ample content with 
-                superior quality.  
+
+    <h2 class="title">Attack Selection </h2>
+    <div class="row">
+
+        <div class="col-sm-4">
+            <form>  
+                <b> Select script/attack to execute </b>  
+                <select id = "script-dropdown"  onchange = "selectAttack()">  
+                <option> ---Choose script--- </option>  
+            </form>
+        </div>
+        <div class="col-sm-4">
+            <p hidden> Your selected attack is:   
+                <input hidden type = "text" id = "favourite" size = "20"> 
             </p>
-        </div>
-
+        </div> 
+        <div class="col-sm-4">
+            <p id = "socket-connection-status"> Socket Connection Status is: Off  </p>
+        </div> 
     </div>
 
 
     <div class="row">
-
         <div class="col-sm-6">
             <div class="card">
-            <div class="card-body" id = "card-body-3">
-                <h5 class="card-title" id = "card-title-3">Script Number 3</h5>
-                <p class="card-text" id = "card-text-3">This script would demostrate the reconnaisance of the internal network</p>
-                <form>
-                    <a href=# id=script3>
-                        <button id ="script3" class='btn btn-primary'>Start Recon</button>
-                    </a>
-                </form>
-            </div>
+                <div class="card-body" id = "card-body-3">
+                    <h5 class="card-title" id = "card-title-3">File Name</h5>
+                    <p class="card-text" id = "card-text-3">This paragraph would contain a description of the purpose of the selected shell script file</p>
+                    <button id ="execute-script" class='btn btn-primary'>Start</button>
+                    <button id ="stop-connection" class='btn btn-primary'>Stop Socket Connection</button>
+                </div>
             </div>
         </div>
-
-        <div class="scroll col-sm-6" id = "log" class="scroll">
-            <p>
-                With the idea of imparting programming 
-                knowledge, Mr. Sandeep Jain, an IIT 
-                Roorkee alumnus started a dream, 
-                GeeksforGeeks. Whether programming 
-                excites you or you feel stifled, 
-                wondering how to prepare for interview 
-                questions or how to ace data structures 
-                and algorithms, GeeksforGeeks is a 
-                one-stop solution. With every tick of 
-                time, we are adding arrows in our quiver.
-                From articles on various computer 
-                science subjects to programming problems 
-                for practice, from basic to premium courses,
-                from technologies to entrance examinations, 
-                we have been building ample content with 
-                superior quality. 
-            </p>
-        </div>
-
     </div>
 
 
+    <h2 class="title">Attack summary </h2>
 
+    <div class="table-responsive">
+        <table class="table">
+            <tr>
+                <th>Vulnerability</th>
+                <th style="text-align:center;">Success</th>
+                <th style="text-align:center;">Failure</th>
+            </tr>  
+            <tr>
+                <th id="attack-type">---- Choose an attack -----</th>
+                <th style="text-align:center; font-size:150%;" id="execution-success"></th>
+                <th style ="text-align:center; font-size:150%;"  id="execution-failure"></th>
+            </tr>
+        </table>
+    </div>
 
-
-    <!-- Search: <input type="text" id="search_form_input"></input> -->
-    
-    
-    <!-- <h1>Flask-SocketIO Test</h1>
-    <form id="emit" method="POST" action='#'>
-        <input type="text" name="emit_data" id="emit_data" placeholder="Message">
-        <input type="submit" value="Echo">
-    </form> -->
-    <!-- <h2>Receive:</h2>
-    <div id="log"></div> -->
-
-    <form>  
-        <b> Select script/attack to execute </b>  
-        <select id = "script-dropdown"  onchange = "favTutorial()">  
-        <option> ---Choose tutorial--- </option>  
-        
-    </form>
-
-    <p> Your selected tutorial site is:   
-        <input type = "text" id = "favourite" size = "20"> 
-    </p>  
+    <div class="row">
+        <div class="scroll col-sm-6" id = "testoutput" class="scroll">
+            <p>
+                Script output: 
+            </p>
+        </div>
+    </div>
 
 </div>
 
 {% endblock %}
+
+    <!-- // $('#script1').click(function(event) {
+        //     event.preventDefault()
+        //     console.log("NYE");
+        //     var socket = io.connect('http://' + document.domain + ':' + location.port + '/test' , { query: {name: "Test"} });
+        //     //io.connect('http://' + document.domain + ':' + location.port + '/test');
+        //     //receive details from server
+        //     var numbers_received = [];
+        //     socket.on('newnumber', function(msg) {
+        //         console.log("Received message: " + msg.number);
+        //         //maintain a list of ten numbers
+        //         if (numbers_received.length >= 10){
+        //             numbers_received.shift()
+        //         }
+        //         numbers_received.push(msg.number);
+        //         numbers_string = '';
+        //         for (var i = 0; i < numbers_received.length; i++){
+        //             numbers_string = numbers_string + '<p>' + numbers_received[i].toString() + '</p>';
+        //         }
+        //         $('#log').html(numbers_string);
+        //     });
+        // });
+
+
+        // $('#sshscript').click(function(event) {
+        //     event.preventDefault()
+        //     console.log("NYE2");
+        //     var socket = io.connect('http://' + document.domain + ':' + location.port + '/ssh');
+        //     //io.connect('http://' + document.domain + ':' + location.port + '/test');
+        //     //receive details from server
+        //     var numbers_received = [];
+        //     socket.on('newnumber', function(msg) {
+        //         console.log("Received message: " + msg.number);
+        //         //maintain a list of ten numbers
+        //         if (numbers_received.length >= 10){
+        //             numbers_received.shift()
+        //         }
+        //         numbers_received.push(msg.number);
+        //         numbers_string = '';
+        //         for (var i = 0; i < numbers_received.length; i++){
+        //             numbers_string = numbers_string + '<p>' + numbers_received[i].toString() + '</p>';
+        //         }
+        //         $('#sshlog').html(numbers_string);
+        //     });
+        // }); -->

@@ -18,6 +18,7 @@ zipp==3.8.1
 # pip install gevent-websocket
 # pip install eventlet
 # pip install eventlet==0.30.2
+# pip install --upgrade pip wheel setuptools requests
 
 
 Flask-WTF==1.0.1
