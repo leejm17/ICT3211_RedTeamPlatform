@@ -152,17 +152,13 @@ def trigger_recon():
 def trigger_recon():
 
     print('Client for status connected')
-
     event = Event()
-    
     #Create Queue for threads to produce into and consume from
     queue2 = Queue()
     t3 = Thread(target=get_statuses, args=(queue2, event))
     t3.start()
     t4 = Thread(target=emit_statuses, args=(queue2, event))
     t4.start()
-
-
 
     t3.join()
     t4.join()
@@ -173,7 +169,7 @@ def trigger_recon():
 
 
 def get_statuses(queue_in, event):
-    fileName = "homegetallstatus.sh"
+    fileName = "getallstatus.sh"
     print('Get_statuses script started')
     command  ='./scripts/' + fileName
     process = subprocess.Popen([command],  stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
@@ -290,35 +286,50 @@ def file_upload():
 
 @app.route('/remotefileupload', methods=['GET', 'POST'])
 def remote_file_upload():
+
     if request.method == "POST":
+
         select = request.form.get('exe-select')
         fileDirectory = request.form.get('file-directory')
         fullFileName = os.path.join('./executables/', select)
         print(fullFileName)
         if not select.endswith(".exe"):
             flash(u'File selected does not end with exe', 'danger')
+            return redirect(url_for('file_upload'))
 
+        # If user inputs a specific file directory,
+        # append file directory to scp command
         if fileDirectory != '':
             print("Initial fileDirectory is: ", fileDirectory)
             fileDirectory = fileDirectory.rstrip("\\")
             print("stripped fileDirectory is: ", fileDirectory)
             fileDirectory = '"' +  fileDirectory.strip() + '"'
             command = 'sshpass -p "Student12345@" scp ' + fullFileName + ' student@172.16.2.223:' + fileDirectory
+        else:
+            # If user does not input a specific file directory,
+            # default to using "C:\\Users\\student\\Desktop\\SharedFolder" directory in scp command
+            command = 'sshpass -p "Student12345@" scp ' + fullFileName + ' student@172.16.2.223:"C:\\Users\\student\\Desktop\\SharedFolder"'
 
-            process = subprocess.Popen([command],  stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
-                             shell=True,
-                             encoding='utf-8',
-                             errors='replace')
-            while True:
-                realtime_output = process.stdout.readline()
-                if realtime_output == '' and process.poll() is not None:
-                    break
-                if realtime_output:
-                    print(realtime_output.strip(), flush=True)
-                    if "No such file or directory" in realtime_output:
-                        flash(u'No such file or directory', 'danger')
+        # run scp command using popen and upload the file to the remote system
+        process = subprocess.Popen([command],  stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
+                            shell=True,
+                            encoding='utf-8',
+                            errors='replace')
+        while True:
+            realtime_output = process.stdout.readline()
+            if realtime_output == '' and process.poll() is not None:
+                flash(u'File Succesfully Uploaded to remote host', 'Success') 
+                break
+            if realtime_output:
+                # print(realtime_output.strip(), flush=True)
+                # if unable to upload the file, return error
+                if "No such file or directory" in realtime_output:
+                    flash(u'No such file or directory', 'danger')
+                if "Connection timed out" in realtime_output:
+                    flash(u'Unable to connect to remote host, connection timeout', 'danger') 
 
     return redirect(url_for('file_upload'))
+
 
 @app.route("/getexefiles", methods=["GET"])
 def get_exe_files():
@@ -332,6 +343,68 @@ def get_list_of_exe_files():
         if file.endswith(".exe"):
             existing_dict[file] = []
     return existing_dict
+#=========================================================================================================================================#
+
+@app.route('/remotefiledownload', methods=['GET', 'POST'])
+def remote_file_download():
+
+    if request.method == "POST":
+        remoteFileDirectory = request.form.get('remote-file-directory')
+        localFileDirectory = request.form.get('local-file-directory')
+
+
+        # If user inputs a specific file directory,
+        # .........
+        if (remoteFileDirectory != '' and localFileDirectory != '') :
+            remoteFileDirectory = remoteFileDirectory.rstrip("\\")
+            remoteFileDirectory = remoteFileDirectory.rstrip("/")
+            remoteFileDirectory = '"' +  remoteFileDirectory.strip() + '"'
+
+            localFileDirectory = localFileDirectory.rstrip("\\")
+            localFileDirectory = localFileDirectory.rstrip("/")
+            command = 'sshpass -p "Student12345@" scp -r student@172.16.2.223:' + remoteFileDirectory + ' ' + localFileDirectory
+            print("local+remoteFileDirectory != '' command is: ", command)
+
+        elif remoteFileDirectory != '' or localFileDirectory != '':
+            if remoteFileDirectory != '':
+                remoteFileDirectory = remoteFileDirectory.rstrip("\\")
+                remoteFileDirectory = remoteFileDirectory.rstrip("/")
+                remoteFileDirectory = '"' +  remoteFileDirectory.strip() + '"'
+                command = 'sshpass -p "Student12345@" scp -r student@172.16.2.223:' + remoteFileDirectory + ' /root/testdownload'
+                print(" remoteFileDirectory != '' command is: " ,command)
+            if localFileDirectory != '':
+                localFileDirectory = localFileDirectory.rstrip("\\")
+                localFileDirectory = localFileDirectory.rstrip("/")
+                command = 'sshpass -p "Student12345@" scp -r student@172.16.2.223:"C:\\Users\\Student\\Documents\\AttackFolder"' + ' ' + localFileDirectory
+                print("localFileDirectory != '' command is: " ,command)
+            
+        else:
+            command = 'sshpass -p "Student12345@" scp -r student@172.16.2.223:"C:\\Users\\Student\\Documents\\AttackFolder" /root/testdownload'
+            print("default command is: ", command)
+        # run scp command using popen and upload the file to the remote system
+        process = subprocess.Popen([command],  stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
+                            shell=True,
+                            encoding='utf-8',
+                            errors='replace')
+        while True:
+            realtime_output = process.stdout.readline()
+            if realtime_output == '' and process.poll() is not None:
+                flash(u'Files has been successfully copied to local folder: ', 'success')
+                break
+            if realtime_output:
+                # print(realtime_output.strip(), flush=True)
+                # If unable to connect to remote host or upload the fsile, return error
+                print(realtime_output, flush = True)
+                if "No such file or directory" in realtime_output:
+                    flash(u'No such file or directory on remote host', 'danger')
+                    break
+                elif "Connection timed out" in realtime_output:
+                    flash(u'Unable to connect to remote host, connection timeout', 'danger')
+                    break
+            
+
+    return render_template('remotefiledownload.html')
+
 
 if __name__ == '__main__':
     socketio.run(app)

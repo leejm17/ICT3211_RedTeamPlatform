@@ -139,59 +139,24 @@
         {% endif %}
     {% endwith %} 
 
-    <div class="row">
-        <h2>Upload .sh or exe file </h2>
-        <div class="card card-style mb-2">
-            <div class="card-body">
-                <form action = "{{ url_for('.file_upload') }}" method = "POST" enctype = "multipart/form-data">
-                    {{form.csrf_token}}
-                    <div class="form-group">
-                        {{form.upload.label}}
-                    </div>
-                    <div class="form-group">
-                        {{form.upload}}
-                    </div>
-                    <!--some code display flash msg-->
-                    <div class="form-group border-bottom pb-3">
-                    <button type="submit">Submit</button>
-                </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- <div class="row">
-        <div class="col-sm-6">
-            <form action = "{{ url_for('.file_upload') }}" method = "POST">
-                <div class="form-group">
-                    <b> Select script/attack to upload to remote system </b>  
-                    <select name="exe-select" id = "script-dropdown"  onchange = "selectAttack()">  
-                    <option> ---Choose script--- </option>
-                </div>
-                <button type="submit" class="btn btn-default">Go</button>
-                <button type="submit">Submit</button>
-            </form>
-        </div>
-        <div class="col-sm-6">
-            <p> Your selected exe is:   
-                <input type = "text" id = "favourite" size = "20"> 
-            </p>
-        </div>
-    </div> -->
     <hr class="solid">
     
     <div class="row">
-        <h2>Upload exe file to remote host </h2>
-        <h6>Executable file would be uploaded to remote host (172.16.2.223), default directory is "C:\\Users\\student\\Desktop\\SharedFolder"  </h6>
-        <div class="col-sm-6">
-            <form action="/remotefileupload" method="POST">
-                <label for="exe">Choose a an exe:</label>
-                <select name="exe-select" id = "script-dropdown"  onchange = "selectAttack()">  
-                    <option> ---Choose script--- </option>
-                </select>
+        <h2>Download file from remote host </h2>
+        <h6>Files would be downloaded from (172.16.2.223), default directory is "/root/testdownload"  </h6>
+        <div class="col-sm-12">
+            <form action="/remotefiledownload" method="POST">
+                <div class="row">
+                    <label for="exe">Define the remote file directory (Windows) from which data would be retrieved from</label>
+                    <label for="localname">Local Directory Name (If Any):</label><br>
+                    <input name="local-file-directory" type="text" id="local-file-directory" name="local-file-directory">
+                </div>
                 <br><br>
-                <label for="lname">Directory Name (If Any):</label><br>
-                <input name="file-directory" type="text" id="file-directory" name="file-directory">
+                <div class="row">
+                    <label for="exe">Define the local file directory (Linux) from which data would be saved to</label>
+                    <label for="remotename">Remote Directory Name (If Any):</label><br>
+                    <input name="remote-file-directory" type="text" id="remote-file-directory" name="remote-file-directory">
+                </div>
                 <br><br>
                 <button type="submit" value="submit" class="btn btn-primary">Remote Upload</button>
             </form>

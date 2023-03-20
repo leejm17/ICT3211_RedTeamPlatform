@@ -32,73 +32,21 @@
             	<li class="nav-item"><a
 		        	{% if request.endpoint=="home" %}class="nav-link active" aria-current="page"
 		        	{% else %}class="nav-link"{% endif %} href="/">Home</a></li>
-        	    
-        	    <li class="nav-item dropdown">
-                    <a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-						{% if request.endpoint=="data_transfer" or request.endpoint=="data_transfer.t_pot" or request.endpoint=="data_transfer.smart_meter" %}class="nav-link dropdown-toggle active" aria-current="page"
-						{% else %}class="nav-link dropdown-toggle"{% endif %}>
-						Data Transfer</a>
-
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-					    <li><a
-							{% if request.endpoint=="data_transfer" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/#">
-							Data Transfer</a></li>
-        	    
-						<li><hr class="dropdown-divider" /></li>
-	                    
-						<li><a
-							{% if request.endpoint=="data_transfer.t_pot" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/#">
-							T-Pot (Debian)</a></li>
-
-                        <li><a
-							{% if request.endpoint=="data_transfer.smart_meter" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/#">
-							Smart Meter (Windows)</a></li>
-                    </ul>
-                </li>
 
             	<li class="nav-item"><a
 		        	{% if request.endpoint=="app_launch" %}class="nav-link active" aria-current="page"
-		        	{% else %}class="nav-link"{% endif %} href="/#">
-		        	App Launch</a></li>
-        	    
-        	    <li class="nav-item dropdown">
-                    <a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-						{% if request.endpoint=="admin" or request.endpoint=="honeypot" or request.endpoint=="spyder" or request.endpoint=="pcap_files" or request.endpoint=="machine_learning" %}class="nav-link dropdown-toggle active" aria-current="page"
-						{% else %}class="nav-link dropdown-toggle"{% endif %}>
-						Admin</a>
+		        	{% else %}class="nav-link"{% endif %} href="/remotefileupload">
+		        	Remote File Upload</a></li>
 
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
- 	                   <li><a
-							{% if request.endpoint=="admin" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/#">
-							Admin Config</a></li>
+				<li class="nav-item"><a
+					{% if request.endpoint=="app_launch" %}class="nav-link active" aria-current="page"
+					{% else %}class="nav-link"{% endif %} href="/remotefiledownload">
+					Remote File Download</a></li>
 
-	                    <li><hr class="dropdown-divider" /></li>
-
-                        <li><a
-							{% if request.endpoint=="honeypot" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/#">
-							Honeypot</a></li>
-
-                        <li><a
-							{% if request.endpoint=="spyder" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/#">
-							Spyder</a></li>
-
-                        <li><a
-							{% if request.endpoint=="pcap_files" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/#">
-							PCAP Files</a></li>
-
-						<li><a
-							{% if request.endpoint=="machine_learning" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/#">
-							Machine Learning</a></li>
-                    </ul>
-                </li>
+				<li class="nav-item"><a
+					{% if request.endpoint=="app_launch" %}class="nav-link active" aria-current="page"
+					{% else %}class="nav-link"{% endif %} href="/attackdashboard">
+					Attack Dashboard</a></li>
                 
 				<li class="nav-item"><a
 					{% if request.endpoint=="help" %}class="nav-link active" aria-current="page"
