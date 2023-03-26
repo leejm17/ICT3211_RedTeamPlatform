@@ -1,22 +1,24 @@
-from flask_bootstrap import Bootstrap5
+# from flask_bootstrap import Bootstrap5
 from flask import Flask, render_template, request, url_for, redirect, flash
 from flask import session, request
 from forms import UploadForm
+from multiprocessing import Process
 
 import subprocess
 from subprocess import Popen, PIPE
 import asyncio
 import sys
 
+import threading
 from threading import Lock
 from threading import Thread, Event
 from flask_socketio import SocketIO, emit, disconnect, send
+import eventlet
 
-from random import random
+
 from time import sleep
-from queue import Queue
-queue = Queue()
-async_mode = None
+# from queue import Queue
+# queue = eventlet.queue()
 
 # For looking sh files
 import os
@@ -27,16 +29,9 @@ import sys
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-bootstrap = Bootstrap5(app)
+# bootstrap = Bootstrap5(app)
 
-socketio = SocketIO(app)#, async_handlers = False) # async_mode=async_mode)
-thread = None
-thread_lock = Lock()
-
-#Random Number Generator Thread
-thread = Thread()
-thread_stop_event = Event()
-
+socketio = SocketIO(app)
 
 # App routes
 @app.route("/", methods=["GET"], endpoint="home")
@@ -47,37 +42,44 @@ def home_page():
 def attack_dashboard():
     return render_template('attackdashboard.html')
 
-
 def run_script(queue_in, fileName, event):
-    print('Run script started')
+    
     command  ='./scripts/' + fileName
-    print(command)
+    print('Run script started')
+    print("command: " + command)
     
     # if ssh in filename, run script that add ssh rules to stop ssh connection
     if "ssh" in command:
-        print("SSH File requested")
-        process = subprocess.Popen([command],  stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
+
+        # print("SSH File requested")
+        process = subprocess.Popen(["\"" +command+ "\""],  stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
                          shell=True,
                          encoding='utf-8',
                          errors='replace')
-        
-        # if ssh in filename, run script that add ssh rules to stop ssh connection
+        # kill the process as the process would hang infinitely
+        process.kill()
+
+        sleep(5)
+
+        # run below command to check if conncetion to remote host would timesout due to the SSH rule in previous command
         testSSHCommand = "sshpass -p 'Student12345@' ssh -o ConnectTimeout=5 student@172.16.2.223"
-        testSSHprocess = subprocess.Popen([testSSHCommand],  stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
+        testSSHProcess = subprocess.Popen([testSSHCommand],  stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
                          shell=True,
                          encoding='utf-8',
                          errors='replace')
+        # Use a while loop to continuosly retrive output of the command/subprocess
         while True:
-            realtime_output = testSSHprocess.stdout.readline()
-            if realtime_output == '' and testSSHprocess.poll() is not None:
+            realtime_output = testSSHProcess.stdout.readline()
+            if realtime_output == '' and testSSHProcess.poll() is not None:
                 break
             if realtime_output:
-                # print(realtime_output.strip(), flush=True)
-                print(realtime_output.strip())
+                """
+                # If the subprocess outputs the phrase "Connection Timed Out",
+                # it means that the SSH port has been succesfully blocked on the remote host
+                """
                 if "Connection timed out" in realtime_output:
                     queue_in.put("Ok.") 
     else:
-        runCounter = 0
         process = subprocess.Popen([command],  stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
                             shell=True,
                             encoding='utf-8',
@@ -87,131 +89,132 @@ def run_script(queue_in, fileName, event):
             if realtime_output == '' and process.poll() is not None:
                 break
             if realtime_output:
-                # runCounter+=1
-                # # print("Real timeoutput is: ",realtime_output.strip(), flush=True)
-                # print("RUN Line Count is: ", runCounter, flush=True)
+                # print("run_script realtime_output: ",realtime_output.strip(), flush=True)
+                # If the output from stdout is not empty, insert it into the shared queue
                 queue_in.put(realtime_output.strip())
+                if "Connection timed out" in realtime_output or "not recognized" in realtime_output:
+                    queue_in.put("Fail.")
+                """
+                # As realtime_output lines contain the string "Ok." with additional junk bytes,
+                # an additional "Ok." is added into the queue for client browser to catch it.
+                """
+                if "Ok." in realtime_output:
+                    queue_in.put("Ok.")
+                    break   
 
-    sleep(1)
-
-    print("subprocess is done")
-
-    event.set()
-
-# @socketio.on("message")
-# def handle_send(msg):
-#     socketio.send(msg)
-
-def emit_script(queue_in, event):
-    print('Emit script started')
-    emitCounter = 0
-    while True:
-        # if counter == 20:
-        #     print("Counter == 20")
-        #     sleep(12)
-        #     counter = 0
-        if not queue_in.empty():
-            line = queue_in.get()
-            socketio.emit('scriptoutput', {'number': str(line)}, namespace='/test')
-            socketio.sleep(0)
-            # emitCounter += 1
-            # emitLine = "EMIT Line Counter is " + str(emitCounter)
-            # socketio.emit('scriptoutput', {'number': str(emitLine)}, namespace='/test')
-            # socketio.sleep(0)
-            # print(emitLine, flush=True)
-        if event.is_set():
-            print('Event is_set')
-            break
-    print('Emit script ended')
-
-
-@socketio.on('connect', namespace='/test')
-def trigger_recon():
-
-    print('Client connected')
-    fileName = request.args.get('file')
-    print("Filename is: ", fileName)
-    
-    #Create Queue for threads to produce into and consume from
-    event = Event()
-    queue1 = Queue()
-    t = Thread(target=run_script, args=(queue1, fileName, event))
-    t.start()
-    t2 = Thread(target=emit_script, args=(queue1, event))
-    t2.start()
-
-    # Stop the thread once sub-process in emit script is completed and event.set()
-    t.join()
-    t2.join()
-    print('Thread Joined')
-
-    return
-
-#Thread to get status of FW, Win Defender and Kepserver
-@socketio.on('connect', namespace='/statuses')
-def trigger_recon():
-
-    print('Client for status connected')
-    event = Event()
-    #Create Queue for threads to produce into and consume from
-    queue2 = Queue()
-    t3 = Thread(target=get_statuses, args=(queue2, event))
-    t3.start()
-    t4 = Thread(target=emit_statuses, args=(queue2, event))
-    t4.start()
-
-    t3.join()
-    t4.join()
-
-    print('Thread Joined')
-
-    return
-
-
-def get_statuses(queue_in, event):
-    fileName = "getallstatus.sh"
-    print('Get_statuses script started')
-    command  ='./scripts/' + fileName
-    process = subprocess.Popen([command],  stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
-                         shell=True,
-                         encoding='utf-8',
-                         errors='replace')
-    
-    output_stringlist = []
-    while True:
-        realtime_output = process.stdout.readline()
-        if realtime_output == '' and process.poll() is not None:
-            break
-        if realtime_output:
-            realtime_output = realtime_output.replace('-', '')
-            realtime_output = realtime_output.replace(':', '')
-            # print(realtime_output.strip(), flush=True)
-            output_stringlist.append(realtime_output.strip())
-    
-    output = firewall_status(output_stringlist)
-    queue_in.put(output)
-    queue_in.put("Ok.")
     sleep(2)
 
     print("subprocess is done")
 
     event.set()
 
-def firewall_status(stringlist):
-    # Remove empty string from list
-    stringlist = list(filter(None, stringlist))
-    stringlist.remove("Ok.")
-    stringlist = [line.lower() for line in stringlist]
-    stringlist = [line.replace('state', ' ') for line in stringlist]
-    stringlist = [line.replace(' ', '') for line in stringlist]
+# @socketio.on("message")
+# def handle_send(line):
     
-    it = iter(stringlist)
-    res_dct = dict(zip(it, it))
+#     # eventlet.sleep(0)
+#     # socketio.sleep(0)
+
+def emit_script(queue_in, event):
+    print('Emit script started')
+
+    # While loop to constantly check if: 
+    while True:
+        """
+        # if the queue is empty and if its not empty,
+        # consume data from the queue and emit the line to client browser 
+        """
+        if not queue_in.empty():
+            line = queue_in.get()
+            eventlet.sleep(0)
+            socketio.emit('scriptoutput', {'number': str(line)}, namespace='/test')
+            # print("emit_script output: ",line, flush=True)
+        """
+        # if event flag has been set by run_script thread
+        # break out of while loop if event flag has been set
+        """ 
+        if event.is_set():
+            print('Event is_set')
+            break
+        
+    print('Emit script ended')
+
+    return
+
+
+@socketio.on('connect', namespace='/test')
+def trigger_recon():
+
+    # eventlet.monkey_patch(thread = True)
+
+    print('Client connected')
+    fileName = request.args.get('file')
+    print("Filename is: ", fileName)
+
+    # Create Queue for the 2 threads to produce into and consume from
+    queue1 = eventlet.Queue()
+    # Create event for subprocess to set event flags
+    event = Event()
     
-    print (res_dct)
+    # Create one thread to run subprocess to execute sh files 
+    t = socketio.start_background_task(run_script, queue1, fileName, event)
+    # t = threading.Thread(target=run_script, args=(queue1, fileName, event))
+    # t.start()
 
-    return res_dct
+    # Create another thread to emit output of subprocess to client browser
+    t2 = socketio.start_background_task(emit_script, queue1, event)
+    # t2 = threading.Thread(target=emit_script, args=(queue1, event))
+    # t2.start()
 
+    # Stop the thread once sub-process in emit_script is completed and event.set()
+    t.join()
+    t2.join()
+
+    print("Thread Joined")
+
+    return
+
+#===============================================Get Various Statuses==================================#
+#Thread to run subprocess to get status of FW, Win Defender and Kepserver
+def get_statuses(queue_in, event):
+
+    # fileName = "getallstatus.sh"
+    fileName = "homegetallstatus.sh"
+    print('Get_statuses script started')
+
+    command  ='./scripts/' + fileName
+    process = subprocess.Popen([command],  stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
+                         shell=True,
+                         encoding='utf-8',
+                         errors='replace')
+
+    output_stringlist = []
+    while True:
+        realtime_output = process.stdout.readline()
+        if realtime_output == '' and process.poll() is not None:
+            break
+        if "Connection timed out" in realtime_output:
+            print("Fail to get statuses")
+            queue_in.put("Fail.")
+            break
+        if realtime_output:
+            # print(realtime_output.strip(), flush=True)
+            realtime_output = realtime_output.replace('-', '')
+            realtime_output = realtime_output.replace(':', '')
+            # Append ALL non-empty lines into an arraylist
+            output_stringlist.append(realtime_output.strip())
+    
+    if output_stringlist: 
+        output = firewall_status(output_stringlist)
+        queue_in.put(output)
+        queue_in.put("Ok.")
+
+    sleep(3)
+
+    print("subprocess is done")
+
+    event.set()
+
+    return
 
 def emit_statuses(queue_in, event):
     print('Emit statuses script started')
@@ -224,10 +227,56 @@ def emit_statuses(queue_in, event):
             break
     print('Emit script ended')
 
-@socketio.on('disconnect')
-def disconnect():
-    emit( 'user disconnected')
-# ===========================================================================================================================#
+    return
+
+
+def firewall_status(stringlist):
+    # Remove empty string from list
+    stringlist = list(filter(None, stringlist))
+    # Remove OK. from stringlist to make array have even values
+    stringlist.remove("Ok.")
+    
+    # Lower case all items in stringlist array
+    # as well as unwanted values such as state and <spaces>
+    stringlist = [line.lower() for line in stringlist]
+    stringlist = [line.replace('state', ' ') for line in stringlist]
+    stringlist = [line.replace(' ', '') for line in stringlist]
+
+    # Convert values in stringlist array to dictionary with key-value pairs
+    it = iter(stringlist)
+    res_dct = dict(zip(it, it))
+    
+    print (res_dct)
+
+    return res_dct
+
+#Thread to get status of FW, Win Defender and Kepserver
+@socketio.on('connect', namespace='/statuses')
+def trigger_recon():
+
+    print('Client for status connected')
+    # Create event for subprocess to set event flags
+    event = Event()
+    # Create Queue for threads to produce into and consume from
+    queue2 = eventlet.Queue()
+
+    # Create one thread to run subprocess to run sshpass 
+    # and get various statuses of remote host
+    t3 = socketio.start_background_task(get_statuses, queue2, event)
+    # t3.start()
+
+    # Create another thread to emit output of subprocess to client browser
+    t4 = socketio.start_background_task(emit_statuses, queue2, event)
+    # t4.start()
+
+    t3.join()
+    t4.join()
+
+    print('Thread Joined')
+
+    return
+
+# ==================Route to get .sh files for user to run in attack dashboard==============================#
 @app.route("/getshfiles", methods=["GET"])
 def get_sh_files():
 	listOfshFiles = get_list_of_sh_files()
@@ -251,6 +300,7 @@ def get_list_of_sh_files():
                 if "Description:" in line:
                     existing_dict[file].append(line)
                 elif "Tag:" in line:
+                    line = line.strip("Tag:")
                     existing_dict[file].append(line)
     
     return existing_dict
@@ -322,7 +372,7 @@ def remote_file_upload():
                 break
             if realtime_output:
                 # print(realtime_output.strip(), flush=True)
-                # if unable to upload the file, return error
+                # if unable to upload the file to remote host, return error
                 if "No such file or directory" in realtime_output:
                     flash(u'No such file or directory', 'danger')
                 if "Connection timed out" in realtime_output:
@@ -407,39 +457,5 @@ def remote_file_download():
 
 
 if __name__ == '__main__':
+    eventlet.monkey_patch()
     socketio.run(app)
-
-
-
-# p = subprocess.Popen([command], stdout=subprocess.PIPE, bufsize=1)
-# # for line in p.stdout.readline():
-# #     # line.rstrip()
-# #     # line.lstrip()
-# #     line = str(line)
-# #     # line.rstrip()
-# #     # line.lstrip()
-# #     # print("run_script is: ", line)
-# #     queue_in.put(line)
-# p.stdout.close()
-# p.wait()
-
-
-    # class RandomThread(Thread):
-#     def __init__(self):
-#         self.delay = 1
-#         super(RandomThread, self).__init__()
-#     def randomNumberGenerator(self):
-#         """
-#         Generate a random number every 1 second and emit to a socketio instance (broadcast)
-#         Ideally to be run in a separate thread?
-#         """
-#         #infinite loop of magical random numbers
-#         print("Making random numbers")
-#         while not thread_stop_event.isSet():
-#             number = round(random()*10, 3)
-#             print (number)
-#             socketio.emit('newnumber', {'number': str(line)}, namespace='/test')
-#             sleep(self.delay)
-
-#     def run(self):
-#         self.randomNumberGenerator()

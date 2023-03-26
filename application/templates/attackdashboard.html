@@ -75,6 +75,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
         
+        
         // https://softauthor.com/javascript-dynamic-html-select-drop-down/
         // https://www.javatpoint.com/how-to-create-dropdown-list-using-javascript
         var fileDescription
@@ -114,6 +115,7 @@
         }
 
         function getStatuses() {
+            // event.preventDefault()
             // code to be executed
             var statusSocket = io.connect('http://' + document.domain + ':' + location.port + '/statuses' , {pingTimeout: 120000, pingInterval: 120000});
             statusSocket.pingInterval = 120000
@@ -134,6 +136,11 @@
                     socketStatusElement.innerHTML = 'Statuses Socket Connection status is: Off'
                     // console.log("Socket status after success/ok is: " + socket.disconnected);
                 }
+                else if (msg.number == "Fail."){
+                    statusSocket.disconnect()
+                    var socketStatusElement = document.getElementById("statuses-socket-connection-status");
+                    socketStatusElement.innerHTML = 'Statuses Socket Connection status is: Off'
+                }
                 else{
                     statusesDictionary = msg.number
                     for (let key in statusesDictionary) {
@@ -148,6 +155,7 @@
         }
         
         $(document).ready(function(){
+            getStatuses();
 
             $('#get-statuses').click(function(event) {
                 event.preventDefault()
@@ -202,7 +210,7 @@
                 
                 // *TO NOTE* Get the file name submitted by the user with the id of "favourite" 
                 var fileName = document.getElementById("favourite").value
-                // console.log(fileName);
+                console.log(fileName);
                 
                 // Initilaize and establish a socket session to /test Python Flask route and run code within the route 
                 var socket = io.connect('http://' + document.domain + ':' + location.port + '/test' , { query: "file="+ fileName }, {pingTimeout: 120000, pingInterval: 120000});
@@ -274,6 +282,29 @@
                 // console.log("Console Done: " );
                 
             });
+            // // Disconnect socket when button with id of "stop-connection" is clicked
+            // $('#terminate-process').click(function(event) 
+            // {
+            //     event.preventDefault();
+            //     console.log("terminate-process button pressed.");
+            //     fileName = "terminate"
+            //     var terminateSocket = io.connect('http://' + document.domain + ':' + location.port + '/terminate' , {pingTimeout: 120000, pingInterval: 120000});
+            //     terminateSocket.pingInterval = 120000
+            //     terminateSocket.pingTimeout = 120000
+            //     console.log(terminateSocket);
+                
+            //     // Initialize socket listener listen for emit from socket with the same _____name from the Python Flask server
+            //     terminateSocket.on('terminateoutput', function(msg) 
+            //     {
+            //         console.log("Terminate message: " + msg.number);
+            //         // If browser recieves Success in the data, print checkmark to user
+            //         // and disconnect client from server
+            //         if (msg.number == "Success" || msg.number == "Ok."){
+            //             terminateSocket.disconnect()
+            //         }
+
+            //     });
+            // });
 
             // Get a list of sh file from the file system through /getshfiles Python Flask Route
             // and append them into the the dropdown menu
@@ -308,21 +339,21 @@
         <table class="table">
             <tr>
                 <th style="text-align:center;">Firewall Domain Profile is:  </th>
-                <th id="domainprofilesettings" style="text-align:center;">Off</th>
+                <th id="domainprofilesettings" style="text-align:center;">-</th>
 
                 <th style="text-align:center;">Windows Defender status is:  </th>
-                <th id="antivirusenabled" style="text-align:center;">Off</th>
+                <th id="antivirusenabled" style="text-align:center;">-</th>
             </tr> 
             <tr>
                 <th style="text-align:center;">Firewall Private Profile is:  </th>
-                <th id="privateprofilesettings" style="text-align:center;">Off</th>
+                <th id="privateprofilesettings" style="text-align:center;">-</th>
                 
                 <th style="text-align:center;">Kepserver status is:  </th>
-                <th id="status" style="text-align:center;">Off</th>
+                <th id="status" style="text-align:center;">-</th>
             </tr>
             <tr>
                 <th style="text-align:center;">Firewall Public Profile is:  </th>
-                <th id="publicprofilesettings" style="text-align:center;">Off</th>
+                <th id="publicprofilesettings" style="text-align:center;">-</th>
                 <th style="text-align:center;">  </th>
                 <th style="text-align:center;"> </th>
             </tr>   
@@ -402,6 +433,7 @@
                     <p class="card-text" id = "card-text-3">This paragraph would contain a description of the purpose of the selected shell script file</p>
                     <button id ="execute-script" class='btn btn-primary'>Start</button>
                     <button id ="stop-connection" class='btn btn-primary'>Stop Socket Connection</button>
+                    <!-- <button id ="terminate-process" class='btn btn-primary'>Terminate Process</button> -->
                 </div>
             </div>
         </div>
@@ -429,10 +461,10 @@
     </div>
 
     <div class="row">
+        <p>
+            Attack / Exploit Output: 
+        </p>
         <div class="scroll col-sm-6" id = "testoutput" class="scroll">
-            <p>
-                Script output: 
-            </p>
         </div>
     </div>
 
