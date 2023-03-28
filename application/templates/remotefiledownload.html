@@ -143,29 +143,23 @@
     
     <div class="row">
         <h2>Download file from remote host </h2>
-        <h6>Files would be downloaded from (172.16.2.223), default directory is "/root/testdownload"  </h6>
         <div class="col-sm-12">
             <form action="/remotefiledownload" method="POST">
                 <div class="row">
-                    <label for="exe">Define the remote file directory (Windows) from which data would be retrieved from</label>
-                    <label for="localname">Local Directory Name (If Any):</label><br>
+                    <label for="exe"> Default local directory is "/root/testdownload"</label>
+                    <label for="exe">Define the local file directory (Linux) from which data would be saved to (If Any:)</label>
                     <input name="local-file-directory" type="text" id="local-file-directory" name="local-file-directory">
                 </div>
                 <br><br>
                 <div class="row">
-                    <label for="exe">Define the local file directory (Linux) from which data would be saved to</label>
-                    <label for="remotename">Remote Directory Name (If Any):</label><br>
+                    <label for="exe">Files would be downloaded from (172.16.2.223), default remote directory is: "C:\Users\student\Desktop\SharedFolder"</label>
+                    <label for="remotename">Define the remote file directory (Windows) from which data would be retrieved from (If Any):</label><br>
                     <input name="remote-file-directory" type="text" id="remote-file-directory" name="remote-file-directory">
                 </div>
                 <br><br>
                 <button type="submit" value="submit" class="btn btn-primary">Remote Upload</button>
             </form>
         </div>
-        <!-- <div class="col-sm-6">
-            <p> Your selected exe is:   
-                <input type = "text" id = "favourite" size = "20"> 
-            </p>
-        </div> -->
     </div> 
 
 </div>

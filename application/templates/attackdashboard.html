@@ -108,150 +108,202 @@
             // Get the values of the dictionary key selected by user
             var attackDescription = fileDescription[document.getElementById("favourite").value]
             
+            // Append the file name as into the Card title
             cardTitle.innerHTML  = mylist.options[mylist.selectedIndex].text;
+            // Append the attack description into the card text
             cardText.innerHTML  =  attackDescription[0];
+            // Append the tag into the table row under the Vulnerability Column
             attackTypeElement.innerHTML = attackDescription[1];
             
         }
 
         function getStatuses() {
-            // event.preventDefault()
-            // code to be executed
-            var statusSocket = io.connect('http://' + document.domain + ':' + location.port + '/statuses' , {pingTimeout: 120000, pingInterval: 120000});
+
+            // Initilaize and establish a socket session namespace with name of /statuses and execute code within the namespace on Python Flask Server
+            var statusSocket = io.connect('http://' + document.domain + ':' + location.port + '/statuses' , { query: "file="}, {pingTimeout: 120000, pingInterval: 120000});
             statusSocket.pingInterval = 120000
             statusSocket.pingTimeout = 120000
 
             // console.log(socket)
             // console.log("Start-connection button pressed." + socket.disconnected);
 
+            // Change the socket status (of statuses) diplayed to user from Off to On 
             var socketStatusElement = document.getElementById("statuses-socket-connection-status");
             socketStatusElement.innerHTML = 'Statuses Socket Connection status is: On'
 
+            // Initialize socket listener within /statuses namespace to listen for events from the event emitter name of "statusoutput" from the Python Flask server
             statusSocket.on('statusoutput', function(msg) {
-                console.log(msg)
-                console.log(msg.number)
-                if (msg.number == "Ok."){
+                // console.log(msg)
+                // console.log(msg.number)
+
+                // if client-browser receive the string "Ok." from Python Flask server /statuses namespace
+                if (msg.number == "Ok."){    
+                    // console.log(statusSocket)
+                    
+                    // Disconnect the socket connection
                     statusSocket.disconnect()
+                    // Change the connection status displayed to the user 
                     var socketStatusElement = document.getElementById("statuses-socket-connection-status");
                     socketStatusElement.innerHTML = 'Statuses Socket Connection status is: Off'
+
                     // console.log("Socket status after success/ok is: " + socket.disconnected);
+                    return
                 }
                 else if (msg.number == "Fail."){
+                    // If client-browser receive the string "Fail." from Python Flask server /statuses namespace
+                    // Disconnect the socket connection
                     statusSocket.disconnect()
+                    
                     var socketStatusElement = document.getElementById("statuses-socket-connection-status");
                     socketStatusElement.innerHTML = 'Statuses Socket Connection status is: Off'
+                    return
                 }
                 else{
                     statusesDictionary = msg.number
                     for (let key in statusesDictionary) {
-                        console.log(key)
-                        console.log(statusesDictionary[key])
+                        // console.log(key)
+                        // console.log(statusesDictionary[key])
+
+                        // Keys within dictionary has their own respective javascript id hardcoded into this page with the same name
                         var statusesTableElement = document.getElementById(key);
-                        console.log(statusesTableElement)
+                            
+                        // Value pair of the repective keys are set as innerHTML values  
                         statusesTableElement.innerHTML = statusesDictionary[key]
                     }
                 }
             });
+
+            return
         }
         
         $(document).ready(function(){
-            getStatuses();
+            // getStatuses();
 
             $('#get-statuses').click(function(event) {
                 event.preventDefault()
-                getStatuses()
+                // Initilaize and establish a socket session namespace with name of /statuses and execute code within the namespace on Python Flask Server
+                var statusSocket = io.connect('http://' + document.domain + ':' + location.port + '/statuses' , { query: "file="}, {pingTimeout: 120000, pingInterval: 120000});
+                statusSocket.pingInterval = 120000
+                statusSocket.pingTimeout = 120000
 
-                // var statusSocket = io.connect('http://' + document.domain + ':' + location.port + '/statuses' , {pingTimeout: 120000, pingInterval: 120000});
-                // statusSocket.pingInterval = 120000
-                // statusSocket.pingTimeout = 120000
+                // console.log(socket)
+                // console.log("Start-connection button pressed." + socket.disconnected);
 
-                // // console.log(socket)
-                // // console.log("Start-connection button pressed." + socket.disconnected);
+                // Change the socket status (of statuses) diplayed to user from Off to On 
+                var socketStatusElement = document.getElementById("statuses-socket-connection-status");
+                socketStatusElement.innerHTML = 'Statuses Socket Connection status is: On'
 
-                // var socketStatusElement = document.getElementById("statuses-socket-connection-status");
-                // socketStatusElement.innerHTML = 'Statuses Socket Connection status is: On'
+                // Initialize socket listener within /statuses namespace to listen for events from the event emitter name of "statusoutput" from the Python Flask server
+                statusSocket.on('statusoutput', function(msg) {
+                    // console.log(msg)
+                    // console.log(msg.number)
 
-                // statusSocket.on('statusoutput', function(msg) {
-                //     console.log(msg)
-                //     console.log(msg.number)
-                //     if (msg.number == "Ok."){
-                //         statusSocket.disconnect()
-                //         var socketStatusElement = document.getElementById("statuses-socket-connection-status");
-                //         socketStatusElement.innerHTML = 'Statuses Socket Connection status is: Off'
-                //         // console.log("Socket status after success/ok is: " + socket.disconnected);
-                //     }
-                //     else{
-                //         statusesDictionary = msg.number
-                //         for (let key in statusesDictionary) {
-                //             console.log(key)
-                //             console.log(statusesDictionary[key])
-                //             var statusesTableElement = document.getElementById(key);
-                //             console.log(statusesTableElement)
-                //             statusesTableElement.innerHTML = statusesDictionary[key]
-                //         }
-                //     }
-                    
-                // });
+                    if (msg.number == "Ok."){
+                        
+                        // if client-browser receive the string "Ok." from Python Flask server SocketIO /statuses namespace
+                        console.log(statusSocket)
+                        // Disconnect the socket connection
+                        statusSocket.disconnect()
+                        // Change the connection status displayed to the user 
+                        var socketStatusElement = document.getElementById("statuses-socket-connection-status");
+                        socketStatusElement.innerHTML = 'Statuses Socket Connection status is: Off'
 
-                // $('#status-stop-connection').click(function(event) {
-                //     event.preventDefault();
-                //     statusSocket.disconnect()
-                //     var socketStatusElement = document.getElementById("statuses-socket-connection-status");
-                //     socketStatusElement.innerHTML = 'Statuses Socket Connection status is: Off'
-                //     console.log(statusSocket)
-                //     console.log("statuses-stop-connection button pressed." + statusSocket.disconnected);
-                // });
-                // // console.log("Console Done: " );
+                        // console.log("Socket status after success/ok is: " + socket.disconnected);
+                        return
+                    }
+                    else if (msg.number == "Fail."){
+                        // If client-browser receive the string "Fail." from Python Flask server /statuses namespace
+                        // Disconnect the socket connection
+                        statusSocket.disconnect()
+                        // Change the connection status displayed to the user 
+                        var socketStatusElement = document.getElementById("statuses-socket-connection-status");
+                        socketStatusElement.innerHTML = 'Statuses Socket Connection status is: Off'
+
+                        return
+                    }
+                    else{
+                        // statusDictionary contains a dictionary with the name of various services as the key and coressponding statuses as value pair
+                        statusesDictionary = msg.number
+                        for (let key in statusesDictionary) {
+                            // console.log(key)
+                            // console.log(statusesDictionary[key])
+
+                            // Keys within dictionary has their own respective javascript id hardcoded into this page with the same name
+                            var statusesTableElement = document.getElementById(key);
+                            
+                            // Value pair of the repective keys are set as innerHTML values  
+                            statusesTableElement.innerHTML = statusesDictionary[key]
+
+                        }
+                    }
+                });
+
+                return
+
             });
 
 
             $('#execute-script').click(function(event) {
                 event.preventDefault()
                 
-                // *TO NOTE* Get the file name submitted by the user with the id of "favourite" 
+                // Get the file name submitted by the user with the id of "favourite" 
                 var fileName = document.getElementById("favourite").value
-                console.log(fileName);
+                // console.log(fileName);
                 
-                // Initilaize and establish a socket session to /test Python Flask route and run code within the route 
-                var socket = io.connect('http://' + document.domain + ':' + location.port + '/test' , { query: "file="+ fileName }, {pingTimeout: 120000, pingInterval: 120000});
-                socket.pingInterval = 120000
-                socket.pingTimeout = 120000
+                // Initilaize and establish a socket session namespace with name of /test and execute code within the namespace 
+                var socket = io.connect('http://' + document.domain + ':' + location.port + '/test' , { query: "file="+ fileName }, {pingTimeout: 120000, pingInterval: 120000, _timeout:60000});
+                // set the status of various 
+                socket._timeout = setTimeout(function() {
+                    socket.close();
+                }, 60000);
+                socket.pingInterval = 120000;
+                socket.pingTimeout = 120000;
+                socket.timeout = 60000
                 
-                console.log("Start-connection button pressed." + socket.disconnected);
-                console.log(socket)
+                // console.log("Start-connection button pressed." + socket.disconnected);
+                // console.log(socket);
                 
                 // Change the socket status diplayed to user from Off to On 
                 var socketStatusElement = document.getElementById("socket-connection-status");
-                socketStatusElement.innerHTML = 'Socket Connection status is: On'
+                socketStatusElement.innerHTML = 'Socket Connection status is: On';
 
-                // Initialize socket listener listen for emit from socket with the same _____name from the Python Flask server
+                // Initialize socket listener within /test namespace to listen for events from the event emitter name of "scriptoutput" from the Python Flask server
                 socket.on('scriptoutput', function(msg) {
 
-                    // "number" is the dictionary key and the msg.number gets te value in the number
+                    // "number" is the dictionary key and the msg.number gets the value of the number key
                     // in '/test' Python Flask Route
                     console.log("Received message: " + msg.number);
-                    console.log(socket)
+                    // console.log(socket)
 
                     // If browser recieves Success in the data, print checkmark to user
-                    // and disconnect client from server
+                    
                     if (msg.number == "Success" || msg.number == "Ok."){
                         executionsuccessElement=document.getElementById("execution-success");
                         executionsuccessElement.innerHTML='&#10004;';
-                        
-                        socket.disconnect()
+
+                        // and disconnect client from server
+                        socket.disconnect();
+
+                        // Change the connection status displayed to the user 
                         var socketStatusElement = document.getElementById("socket-connection-status");
                         socketStatusElement.innerHTML = 'Socket Connection status is: Off'
                         console.log("Socket status after success/ok is: " + socket.disconnected);
 
+                        // Invoke getStatuses() function to get the statuses of various services after succeful execution of attack.
                         getStatuses();
                     }
                     else if (msg.number == "Fail.") {
+                        // If browser recieves Fail in the data, print cross to user
+                        
                         executionsuccessElement=document.getElementById("execution-failure");
                         executionsuccessElement.innerHTML='&#10060;';
-                        
-                        socket.disconnect()
+
+                        // disconnect client from server
+                        socket.disconnect();
+
+                        // Change the connection status displayed to the user 
                         var socketStatusElement = document.getElementById("socket-connection-status");
-                        socketStatusElement.innerHTML = 'Socket Connection status is: Off'
+                        socketStatusElement.innerHTML = 'Socket Connection status is: Off';
                         console.log("Socket status after success/ok is: " + socket.disconnected);
 
                     }
@@ -264,14 +316,13 @@
                     testoutputElement=document.getElementById("testoutput");
                     testoutputElement.appendChild(paragraphElement);
 
-                    // console.log("testoutput value is: " + testoutput.value)
 
                 });
 
                 // Disconnect socket when button with id of "stop-connection" is clicked
                 $('#stop-connection').click(function(event) {
                     event.preventDefault();
-                    socket.disconnect()
+                    socket.disconnect();
                     // Change the socket status diplayed to user from On to Off
                     var socketStatusElement = document.getElementById("socket-connection-status");
                     socketStatusElement.innerHTML = 'Socket Connection status is: Off'
@@ -279,32 +330,8 @@
                     console.log(socket)
                 });
 
-                // console.log("Console Done: " );
                 
             });
-            // // Disconnect socket when button with id of "stop-connection" is clicked
-            // $('#terminate-process').click(function(event) 
-            // {
-            //     event.preventDefault();
-            //     console.log("terminate-process button pressed.");
-            //     fileName = "terminate"
-            //     var terminateSocket = io.connect('http://' + document.domain + ':' + location.port + '/terminate' , {pingTimeout: 120000, pingInterval: 120000});
-            //     terminateSocket.pingInterval = 120000
-            //     terminateSocket.pingTimeout = 120000
-            //     console.log(terminateSocket);
-                
-            //     // Initialize socket listener listen for emit from socket with the same _____name from the Python Flask server
-            //     terminateSocket.on('terminateoutput', function(msg) 
-            //     {
-            //         console.log("Terminate message: " + msg.number);
-            //         // If browser recieves Success in the data, print checkmark to user
-            //         // and disconnect client from server
-            //         if (msg.number == "Success" || msg.number == "Ok."){
-            //             terminateSocket.disconnect()
-            //         }
-
-            //     });
-            // });
 
             // Get a list of sh file from the file system through /getshfiles Python Flask Route
             // and append them into the the dropdown menu
