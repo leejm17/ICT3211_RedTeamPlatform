@@ -5,6 +5,11 @@ A Python-based Web application platform that integrates in-house exploits for a 
 A Debian based Linux distro. Ubuntu is the recommended distro 
 Python 3.8 is the recommended Python version.  
 
+Update the repository using:
+```
+apt update
+```
+
 First, install the ssh pass utility which is required for the Python Flask Application to connect to the remote host without a password prompt
 ```
 apt install sshpass
@@ -45,6 +50,16 @@ pip install -r requirements.txt
 After installing the pre-requisite libraries execute the below command to start the Python Flask Server 
 ```
 python -m flask run
+```
+
+For Kali-Linux, download the Python3.8 package as Kali's repository does not store Python packages more than 2 version older than current version which is Python 3.11
+```
+sudo apt-get install libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev
+https://www.python.org/ftp/python/3.8.0/Python-3.8.0.tgz
+tar -xzvf Python-3.8.0.tgz
+cd Python-3.8.0
+./config
+make && sudo make install
 ```
 
 
