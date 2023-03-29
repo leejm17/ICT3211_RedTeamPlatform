@@ -4,4 +4,4 @@ from wtforms.validators import DataRequired, Length, EqualTo, Email, DataRequire
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 
 class UploadForm(FlaskForm):
-        upload = FileField('EXE and SH files only!', validators=[FileRequired(), FileAllowed(['exe', 'sh'], 'EXE and SH files only!!')])
+        upload = FileField('Only .exe and .sh files are accepted.', validators=[FileRequired(), FileAllowed(['exe', 'sh'], 'Only .exe and .sh files are accepted.')])

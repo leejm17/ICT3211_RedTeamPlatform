@@ -53,12 +53,11 @@ def run_script(queue_in, fileName, event):
                          shell=True,
                          encoding='utf-8',
                          errors='replace')
-        # kill the process as the process would hang infinitely
         sleep(5)
+        # kill the process as the process would hang infinitely
         process.kill()
 
         sleep(2)
-
         # run below command to check if conncetion to remote host would timesout due to the SSH rule in previous command
         testSSHCommand = "sshpass -p 'Student12345@' ssh -o ConnectTimeout=5 student@172.16.2.223"
         testSSHProcess = subprocess.Popen([testSSHCommand],  stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
@@ -90,11 +89,8 @@ def run_script(queue_in, fileName, event):
                 queue_in.put("Ok.")
                 break
             if realtime_output:
-                # print("run_script realtime_output: ",realtime_output.strip(), flush=True)
-
                 # If the output from stdout is not empty, insert it into the shared queue queue_in
                 queue_in.put(realtime_output.strip())
-                
                 if "timed out" in realtime_output or "not recognized" in realtime_output or "permission denied" in realtime_output:
                     queue_in.put("Fail.")
                     break
@@ -107,7 +103,6 @@ def run_script(queue_in, fileName, event):
                 if "Ok." in realtime_output:
                     queue_in.put("Ok.")
                     break   
-
     sleep(2)
 
     print("subprocess is done")
@@ -149,13 +144,18 @@ def emit_script(queue_in, event):
 
 
 @socketio.on('connect', namespace='/test')
-def trigger_recon():
+def trigger_attack():
 
     # eventlet.monkey_patch(thread = True)
 
     print('Client connected')
     fileName = request.args.get('file')
     print("Filename is: ", fileName)
+
+    if not fileName.endswith(".sh"):
+        socketio.emit('scriptoutput', {'number': str("File selected is not an sh file. Please try again")}, namespace='/test')
+        socketio.emit('scriptoutput', {'number': str("Fail.")}, namespace='/test')
+        return
 
     # Create Queue for the 2 threads to produce into and consume from
     attackIOQueue = eventlet.Queue()
@@ -243,7 +243,7 @@ def emit_statuses(queue_in, event):
 def firewall_status(stringlist):
     # Remove empty string from list
     stringlist = list(filter(None, stringlist))
-    # Remove OK. from stringlist to make array have even values
+    # Remove "OK." from stringlist to make array have even values as stringlist array has odd number of values
     stringlist.remove("Ok.")
     """
     # Lower case all items in stringlist array

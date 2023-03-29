@@ -140,7 +140,7 @@
     {% endwith %} 
 
     <div class="row">
-        <h2>Upload .sh or exe file </h2>
+        <h2>Upload .sh or .exe to local filesystem </h2>
         <div class="card card-style mb-2">
             <div class="card-body">
                 <form action = "{{ url_for('.file_upload') }}" method = "POST" enctype = "multipart/form-data">
@@ -163,19 +163,20 @@
     <hr class="solid">
     
     <div class="row">
-        <h2>Upload exe file to remote host </h2>
-        <p>Executable file would be uploaded to remote host (172.16.2.223), default directory is "C:\Users\student\Desktop\SharedFolder"  </p>
+        <h2>Upload file to Smart Meter PC </h2>
+        <p>Executable file selected would be uploaded to the Smart Meter PC (172.16.2.223) </p>
+        <p>The default remote directory is: "C:\Users\student\Desktop\SharedFolder"  </p>
         <div class="col-sm-12">
             <form action="/remotefileupload" method="POST">
                 <div class="row">
-                    <label for="exe">Choose  an exe:</label>
+                    <label for="exe">Choose  an .exe file to upload to the Smart Meter PC:</label>
                     <select name="exe-select" id = "script-dropdown"  onchange = "selectAttack()">  
                         <option> ---Choose script--- </option>
                     </select>
                 </div>
                 <br><br>
                 <div class="row">
-                    <label for="lname">Remote Windows Host Directory Name (If Any):</label><br>
+                    <label for="lname">Remote Smart Meter PC Directory Name (If Any):</label><br>
                     <input name="file-directory" type="text" id="file-directory" name="file-directory">
                 </div>
                 <br><br>

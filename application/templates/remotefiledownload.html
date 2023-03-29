@@ -142,7 +142,9 @@
     <hr class="solid">
     
     <div class="row">
-        <h2>Download file from remote host </h2>
+        <h2>Download files from Smart Meter PC </h2>
+        <label for="exe">This function is to retrieve files from the Smart Meter PC (172.16.2.223).</label>
+        <br><br>
         <div class="col-sm-12">
             <form action="/remotefiledownload" method="POST">
                 <div class="row">
@@ -152,12 +154,12 @@
                 </div>
                 <br><br>
                 <div class="row">
-                    <label for="exe">Files would be downloaded from (172.16.2.223), default remote directory is: "C:\Users\student\Desktop\SharedFolder"</label>
+                    <label for="exe">The default remote directory is: "C:\Users\student\Desktop\SharedFolder"</label>
                     <label for="remotename">Define the remote file directory (Windows) from which data would be retrieved from (If Any):</label><br>
                     <input name="remote-file-directory" type="text" id="remote-file-directory" name="remote-file-directory">
                 </div>
                 <br><br>
-                <button type="submit" value="submit" class="btn btn-primary">Remote Upload</button>
+                <button type="submit" value="submit" class="btn btn-primary">Download</button>
             </form>
         </div>
     </div> 
