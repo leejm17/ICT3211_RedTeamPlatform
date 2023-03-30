@@ -57,7 +57,7 @@ def run_script(queue_in, fileName, event):
         # kill the process as the process would hang infinitely
         process.kill()
 
-        sleep(2)
+        sleep(5)
         # run below command to check if conncetion to remote host would timesout due to the SSH rule in previous command
         testSSHCommand = "sshpass -p 'Student12345@' ssh -o ConnectTimeout=5 student@172.16.2.223"
         testSSHProcess = subprocess.Popen([testSSHCommand],  stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
@@ -91,7 +91,7 @@ def run_script(queue_in, fileName, event):
             if realtime_output:
                 # If the output from stdout is not empty, insert it into the shared queue queue_in
                 queue_in.put(realtime_output.strip())
-                if "timed out" in realtime_output or "not recognized" in realtime_output or "permission denied" in realtime_output:
+                if "timed out" in realtime_output or "not recognized" in realtime_output or "permission denied" in realtime_output or "cannot find the path specified" in realtime_output:
                     queue_in.put("Fail.")
                     break
                 if "Fail." in realtime_output:

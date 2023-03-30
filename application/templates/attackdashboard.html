@@ -75,7 +75,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
         
-        
         // https://softauthor.com/javascript-dynamic-html-select-drop-down/
         // https://www.javatpoint.com/how-to-create-dropdown-list-using-javascript
         var fileDescription
@@ -276,7 +275,6 @@
                     // console.log(socket)
 
                     // If browser recieves Success in the data, print checkmark to user
-                    
                     if (msg.number == "Success" || msg.number == "Ok."){
                         executionsuccessElement=document.getElementById("execution-success");
                         executionsuccessElement.innerHTML='&#10004;';
@@ -395,13 +393,13 @@
         <div class="card">
           <div class="card-header">
             <a class="btn" data-bs-toggle="collapse" href="#collapseOne">
-              Get statuses
+                Retrieve statuses
             </a>
           </div>
           <div id="collapseOne" class="collapse show" data-bs-parent="#accordion">
             <div class="card-body">
-                <h5 class="card-title" id = "card-title">Statuses</h5>
-                <p class="card-text" id = "card-text">This card is for getting status of various things</p>
+                <h5 class="card-title" id = "card-title">Retrieve Statuses</h5>
+                <p class="card-text" id = "card-text">To retrieve the status of various Windows programs and components shown in the table above, click on the Get-statuses button below</p>
                 <button id ="get-statuses" class='btn btn-primary'>Get-statuses</button>
                 <!-- <button id ="status-stop-connection" class='btn btn-primary'>Stop Status Socket Connection</button> -->
             </div>
