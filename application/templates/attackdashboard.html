@@ -251,7 +251,7 @@
                 
                 // Initilaize and establish a socket session namespace with name of /test and execute code within the namespace 
                 var socket = io.connect('http://' + document.domain + ':' + location.port + '/test' , { query: "file="+ fileName }, {pingTimeout: 120000, pingInterval: 120000, _timeout:60000});
-                // set the status of various 
+                // set the status of various io.connect properties
                 socket._timeout = setTimeout(function() {
                     socket.close();
                 }, 60000);
@@ -343,7 +343,6 @@
                         let option = document.createElement("option");
                         option.setAttribute('value', key);
                         scriptDropDown.appendChild(option);
-
                         let optionText = document.createTextNode(key);
                         option.appendChild(optionText);
                     }
