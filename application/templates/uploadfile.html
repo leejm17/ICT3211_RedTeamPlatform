@@ -59,41 +59,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
         
-        // https://softauthor.com/javascript-dynamic-html-select-drop-down/
-        // https://www.javatpoint.com/how-to-create-dropdown-list-using-javascript
-        // var fileDescription
-        function selectAttack() {
-            //Reset text in scroll text element 
-            // when user selects new .sh file from dropdown menu
-            const outputElement = document.getElementById("testoutput");
-            outputElement.innerHTML='';
-
-            // Reset vulnerability and Success/Failure values 
-            // when user selects new .sh file from dropdown menu
-            const executionSuccessElement = document.getElementById("execution-success");
-            executionSuccessElement.innerHTML='';
-            const executionFailureElement = document.getElementById("execution-failure");
-            executionFailureElement.innerHTML='';
-            const attackTypeElement = document.getElementById("attack-type");
-            attackTypeElement.innerHTML='';
-
-
-            // Change title text and description text in card element
-            //  when user selects new .sh file from dropdown menu 
-            const cardTitle = document.getElementById("card-title-3");  
-            const cardText = document.getElementById("card-text-3");
-
-            // Get the dictionary key selected by user
-            var mylist = document.getElementById("script-dropdown");
-            document.getElementById("favourite").value = mylist.options[mylist.selectedIndex].text;
-
-            // Get the values of the dictionary key selected by user
-            var attackDescription = fileDescription[document.getElementById("favourite").value]
-            
-
-            
-        }
-        
         $(document).ready(function(){
 
             // Get a list of .exe files from the file system
@@ -119,21 +84,20 @@
         });
 
     </script>
-    
+    <style>
+        .validation_error{
+        color: red;
+    }
+    </style>    
 </head>
 
-
 <!--Page content-->
- 
 <div class="container mt-5">
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
             <div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
                 <span>{{message}}</span> 
-                <!-- <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button> -->
             </div>
             {% endfor %}
         {% endif %}
@@ -151,7 +115,8 @@
                     <div class="form-group">
                         {{form.upload}}
                     </div>
-                    <!--some code display flash msg-->
+                    <span class="validation_error">{{ ', '.join(form.upload.errors) }}</span>
+                    <br>
                     <div class="form-group border-bottom pb-3">
                     <button type="submit">Submit</button>
                 </div>
@@ -170,8 +135,8 @@
             <form action="/remotefileupload" method="POST">
                 <div class="row">
                     <label for="exe">Choose  an .exe file to upload to the Smart Meter PC:</label>
-                    <select name="exe-select" id = "script-dropdown"  onchange = "selectAttack()">  
-                        <option> ---Choose script--- </option>
+                    <select name="exe-select" id = "script-dropdown">  
+                        <option> ---Choose exe--- </option>
                     </select>
                 </div>
                 <br><br>
@@ -183,11 +148,6 @@
                 <button type="submit" value="submit" class="btn btn-primary">Remote Upload</button>
             </form>
         </div>
-        <!-- <div class="col-sm-6">
-            <p> Your selected exe is:   
-                <input type = "text" id = "favourite" size = "20"> 
-            </p>
-        </div> -->
     </div> 
 
 </div>

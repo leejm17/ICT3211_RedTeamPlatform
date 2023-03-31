@@ -54,86 +54,18 @@
         }
     </style>
 
-    <title>Flask-SocketIO Test</title>
+    <title>Remote File Download</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
-    <script type="text/javascript" charset="utf-8">
-        
-        // https://softauthor.com/javascript-dynamic-html-select-drop-down/
-        // https://www.javatpoint.com/how-to-create-dropdown-list-using-javascript
-        // var fileDescription
-        function selectAttack() {
-            //Reset text in scroll text element 
-            // when user selects new .sh file from dropdown menu
-            const outputElement = document.getElementById("testoutput");
-            outputElement.innerHTML='';
-
-            // Reset vulnerability and Success/Failure values 
-            // when user selects new .sh file from dropdown menu
-            const executionSuccessElement = document.getElementById("execution-success");
-            executionSuccessElement.innerHTML='';
-            const executionFailureElement = document.getElementById("execution-failure");
-            executionFailureElement.innerHTML='';
-            const attackTypeElement = document.getElementById("attack-type");
-            attackTypeElement.innerHTML='';
-
-
-            // Change title text and description text in card element
-            //  when user selects new .sh file from dropdown menu 
-            const cardTitle = document.getElementById("card-title-3");  
-            const cardText = document.getElementById("card-text-3");
-
-            // Get the dictionary key selected by user
-            var mylist = document.getElementById("script-dropdown");
-            document.getElementById("favourite").value = mylist.options[mylist.selectedIndex].text;
-
-            // Get the values of the dictionary key selected by user
-            var attackDescription = fileDescription[document.getElementById("favourite").value]
-            
-
-            
-        }
-        
-        $(document).ready(function(){
-
-            // Get a list of sh file from the file system
-            // and append them into the the dropdown menu
-            const scriptDropDown = document.getElementById("script-dropdown");
-            $.ajax({
-                url:"/getexefiles",
-                success: function(resp) {
-                    var ddl = document.getElementById('ddl-id');
-                    fileDescription = resp
-                    // console.log(resp)
-                    for (let key in resp) {
-                        let option = document.createElement("option");
-                        option.setAttribute('value', key);
-                        scriptDropDown.appendChild(option);
-
-                        let optionText = document.createTextNode(key);
-                        option.appendChild(optionText);
-                    }
-                }
-            });
-
-        });
-
-    </script>
-    
 </head>
 
 
 <!--Page content-->
- 
 <div class="container mt-5">
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
             <div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
                 <span>{{message}}</span> 
-                <!-- <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button> -->
             </div>
             {% endfor %}
         {% endif %}

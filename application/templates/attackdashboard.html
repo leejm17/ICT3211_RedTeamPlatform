@@ -75,9 +75,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
         
+        // fileDescription would contain a list of files and their descriptiona and Tags for use in dropdown menu and displaying information
+        var fileDescription
+        
         // https://softauthor.com/javascript-dynamic-html-select-drop-down/
         // https://www.javatpoint.com/how-to-create-dropdown-list-using-javascript
-        var fileDescription
         function selectAttack() {
 
             // Clear text in scroll text element 
@@ -93,7 +95,6 @@
             executionFailureElement.innerHTML='';
             const attackTypeElement = document.getElementById("attack-type");
             attackTypeElement.innerHTML='';
-
 
             // Change title text and description text in card element
             // when user selects new .sh file from dropdown menu 
@@ -123,21 +124,15 @@
             statusSocket.pingInterval = 120000
             statusSocket.pingTimeout = 120000
 
-            // console.log(socket)
-            // console.log("Start-connection button pressed." + socket.disconnected);
-
             // Change the socket status (of statuses) diplayed to user from Off to On 
             var socketStatusElement = document.getElementById("statuses-socket-connection-status");
             socketStatusElement.innerHTML = 'Statuses Socket Connection status is: On'
 
             // Initialize socket listener within /statuses namespace to listen for events from the event emitter name of "statusoutput" from the Python Flask server
             statusSocket.on('statusoutput', function(msg) {
-                // console.log(msg)
-                // console.log(msg.number)
 
                 // if client-browser receive the string "Ok." from Python Flask server /statuses namespace
                 if (msg.number == "Ok."){    
-                    // console.log(statusSocket)
                     
                     // Disconnect the socket connection
                     statusSocket.disconnect()
@@ -145,7 +140,6 @@
                     var socketStatusElement = document.getElementById("statuses-socket-connection-status");
                     socketStatusElement.innerHTML = 'Statuses Socket Connection status is: Off'
 
-                    // console.log("Socket status after success/ok is: " + socket.disconnected);
                     return
                 }
                 else if (msg.number == "Fail."){
@@ -153,6 +147,7 @@
                     // Disconnect the socket connection
                     statusSocket.disconnect()
                     
+                    // Update the status of the socket connection displayed to the user
                     var socketStatusElement = document.getElementById("statuses-socket-connection-status");
                     socketStatusElement.innerHTML = 'Statuses Socket Connection status is: Off'
                     return
@@ -160,9 +155,6 @@
                 else{
                     statusesDictionary = msg.number
                     for (let key in statusesDictionary) {
-                        // console.log(key)
-                        // console.log(statusesDictionary[key])
-
                         // Keys within dictionary has their own respective javascript id hardcoded into this page with the same name
                         var statusesTableElement = document.getElementById(key);
                             
@@ -185,29 +177,21 @@
                 statusSocket.pingInterval = 120000
                 statusSocket.pingTimeout = 120000
 
-                // console.log(socket)
-                // console.log("Start-connection button pressed." + socket.disconnected);
-
                 // Change the socket status (of statuses) diplayed to user from Off to On 
                 var socketStatusElement = document.getElementById("statuses-socket-connection-status");
                 socketStatusElement.innerHTML = 'Statuses Socket Connection status is: On'
 
                 // Initialize socket listener within /statuses namespace to listen for events from the event emitter name of "statusoutput" from the Python Flask server
                 statusSocket.on('statusoutput', function(msg) {
-                    // console.log(msg)
-                    // console.log(msg.number)
 
                     if (msg.number == "Ok."){
-                        
                         // if client-browser receive the string "Ok." from Python Flask server SocketIO /statuses namespace
-                        console.log(statusSocket)
                         // Disconnect the socket connection
                         statusSocket.disconnect()
                         // Change the connection status displayed to the user 
                         var socketStatusElement = document.getElementById("statuses-socket-connection-status");
                         socketStatusElement.innerHTML = 'Statuses Socket Connection status is: Off'
 
-                        // console.log("Socket status after success/ok is: " + socket.disconnected);
                         return
                     }
                     else if (msg.number == "Fail."){
@@ -224,9 +208,7 @@
                         // statusDictionary contains a dictionary with the name of various services as the key and coressponding statuses as value pair
                         statusesDictionary = msg.number
                         for (let key in statusesDictionary) {
-                            // console.log(key)
-                            // console.log(statusesDictionary[key])
-
+                            
                             // Keys within dictionary has their own respective javascript id hardcoded into this page with the same name
                             var statusesTableElement = document.getElementById(key);
                             
@@ -247,7 +229,6 @@
                 
                 // Get the file name submitted by the user with the id of "favourite" 
                 var fileName = document.getElementById("favourite").value
-                // console.log(fileName);
                 
                 // Initilaize and establish a socket session namespace with name of /test and execute code within the namespace 
                 var socket = io.connect('http://' + document.domain + ':' + location.port + '/test' , { query: "file="+ fileName }, {pingTimeout: 120000, pingInterval: 120000, _timeout:60000});
@@ -259,9 +240,6 @@
                 socket.pingTimeout = 120000;
                 socket.timeout = 60000
                 
-                // console.log("Start-connection button pressed." + socket.disconnected);
-                // console.log(socket);
-                
                 // Change the socket status diplayed to user from Off to On 
                 var socketStatusElement = document.getElementById("socket-connection-status");
                 socketStatusElement.innerHTML = 'Socket Connection status is: On';
@@ -271,9 +249,6 @@
 
                     // "number" is the dictionary key and the msg.number gets the value of the number key
                     // in '/test' Python Flask Route
-                    console.log("Received message: " + msg.number);
-                    // console.log(socket)
-
                     // If browser recieves Success in the data, print checkmark to user
                     if (msg.number == "Success" || msg.number == "Ok."){
                         executionsuccessElement=document.getElementById("execution-success");
@@ -285,14 +260,12 @@
                         // Change the connection status displayed to the user 
                         var socketStatusElement = document.getElementById("socket-connection-status");
                         socketStatusElement.innerHTML = 'Socket Connection status is: Off'
-                        console.log("Socket status after success/ok is: " + socket.disconnected);
 
                         // Invoke getStatuses() function to get the statuses of various services after succeful execution of attack.
                         getStatuses();
                     }
                     else if (msg.number == "Fail.") {
                         // If browser recieves Fail in the data, print cross to user
-                        
                         executionsuccessElement=document.getElementById("execution-failure");
                         executionsuccessElement.innerHTML='&#10060;';
 
@@ -302,7 +275,6 @@
                         // Change the connection status displayed to the user 
                         var socketStatusElement = document.getElementById("socket-connection-status");
                         socketStatusElement.innerHTML = 'Socket Connection status is: Off';
-                        console.log("Socket status after success/ok is: " + socket.disconnected);
 
                     }
 
@@ -314,18 +286,16 @@
                     testoutputElement=document.getElementById("testoutput");
                     testoutputElement.appendChild(paragraphElement);
 
-
                 });
 
                 // Disconnect socket when button with id of "stop-connection" is clicked
                 $('#stop-connection').click(function(event) {
                     event.preventDefault();
                     socket.disconnect();
+
                     // Change the socket status diplayed to user from On to Off
                     var socketStatusElement = document.getElementById("socket-connection-status");
                     socketStatusElement.innerHTML = 'Socket Connection status is: Off'
-                    console.log("stop-connection button pressed." + socket.disconnected);
-                    console.log(socket)
                 });
 
                 
@@ -400,29 +370,10 @@
                 <h5 class="card-title" id = "card-title">Retrieve Statuses</h5>
                 <p class="card-text" id = "card-text">To retrieve the status of various Windows programs and components shown in the table above, click on the Get-statuses button below</p>
                 <button id ="get-statuses" class='btn btn-primary'>Get-statuses</button>
-                <!-- <button id ="status-stop-connection" class='btn btn-primary'>Stop Status Socket Connection</button> -->
             </div>
           </div>
         </div>
     </div>
-      
-
-    <!-- <h2 class="title">Statuses </h2>
-    <div class="row" >
-        <div class="col-sm-6">
-            <div class="card">
-                <div class="card-body" id = "card-body-3">
-                    <h5 class="card-title" id = "card-title">Statuses</h5>
-                    <p class="card-text" id = "card-text">This card is for getting status of various things</p>
-                    <button id ="get-statuses" class='btn btn-primary'>Get-statuses</button>
-                    <button id ="status-stop-connection" class='btn btn-primary'>Stop Status Socket Connection</button>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6">
-            <p id = "statuses-socket-connection-status"> Statuses Socket Connection status is: Off  </p>
-        </div>
-    </div> -->
 
     <hr class="solid">
 
@@ -456,7 +407,6 @@
                     <p class="card-text" id = "card-text-3">This paragraph would contain a description of the purpose of the selected shell script file</p>
                     <button id ="execute-script" class='btn btn-primary'>Start</button>
                     <button id ="stop-connection" class='btn btn-primary'>Stop Socket Connection</button>
-                    <!-- <button id ="terminate-process" class='btn btn-primary'>Terminate Process</button> -->
                 </div>
             </div>
         </div>
@@ -494,48 +444,3 @@
 </div>
 
 {% endblock %}
-
-    <!-- // $('#script1').click(function(event) {
-        //     event.preventDefault()
-        //     console.log("NYE");
-        //     var socket = io.connect('http://' + document.domain + ':' + location.port + '/test' , { query: {name: "Test"} });
-        //     //io.connect('http://' + document.domain + ':' + location.port + '/test');
-        //     //receive details from server
-        //     var numbers_received = [];
-        //     socket.on('newnumber', function(msg) {
-        //         console.log("Received message: " + msg.number);
-        //         //maintain a list of ten numbers
-        //         if (numbers_received.length >= 10){
-        //             numbers_received.shift()
-        //         }
-        //         numbers_received.push(msg.number);
-        //         numbers_string = '';
-        //         for (var i = 0; i < numbers_received.length; i++){
-        //             numbers_string = numbers_string + '<p>' + numbers_received[i].toString() + '</p>';
-        //         }
-        //         $('#log').html(numbers_string);
-        //     });
-        // });
-
-
-        // $('#sshscript').click(function(event) {
-        //     event.preventDefault()
-        //     console.log("NYE2");
-        //     var socket = io.connect('http://' + document.domain + ':' + location.port + '/ssh');
-        //     //io.connect('http://' + document.domain + ':' + location.port + '/test');
-        //     //receive details from server
-        //     var numbers_received = [];
-        //     socket.on('newnumber', function(msg) {
-        //         console.log("Received message: " + msg.number);
-        //         //maintain a list of ten numbers
-        //         if (numbers_received.length >= 10){
-        //             numbers_received.shift()
-        //         }
-        //         numbers_received.push(msg.number);
-        //         numbers_string = '';
-        //         for (var i = 0; i < numbers_received.length; i++){
-        //             numbers_string = numbers_string + '<p>' + numbers_received[i].toString() + '</p>';
-        //         }
-        //         $('#sshlog').html(numbers_string);
-        //     });
-        // }); -->

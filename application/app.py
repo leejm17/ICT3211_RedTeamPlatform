@@ -1,8 +1,8 @@
-# from flask_bootstrap import Bootstrap5
 from flask import Flask, render_template, request, url_for, redirect, flash
 from flask import session, request
 from forms import UploadForm
 
+# For executing sh files
 import subprocess
 from subprocess import Popen, PIPE
 import asyncio
@@ -14,10 +14,7 @@ from threading import Thread, Event
 from flask_socketio import SocketIO, emit, disconnect, send
 import eventlet
 
-
 from time import sleep
-# from queue import Queue
-# queue = eventlet.queue()
 
 # For looking sh files
 import os
@@ -28,7 +25,6 @@ import sys
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-# bootstrap = Bootstrap5(app)
 
 socketio = SocketIO(app)
 
@@ -42,10 +38,8 @@ def attack_dashboard():
     return render_template('attackdashboard.html')
 
 def run_script(queue_in, fileName, event):
-    
+
     command  ='./scripts/' + fileName
-    print('Run script started')
-    print("command: " + command)
     
     # if ssh in filename, run script that add ssh rules to stop ssh connection
     if "ssh" in command:
@@ -105,18 +99,9 @@ def run_script(queue_in, fileName, event):
                     break   
     sleep(2)
 
-    print("subprocess is done")
-
     event.set()
 
-# @socketio.on("message")
-# def handle_send(line):
-    
-#     # eventlet.sleep(0)
-#     # socketio.sleep(0)
-
 def emit_script(queue_in, event):
-    print('Emit script started')
 
     # While loop to constantly check if: 
     while True:
@@ -129,16 +114,12 @@ def emit_script(queue_in, event):
             eventlet.sleep(0)
             # Emit to browser client where socket event listener is socket.on(scriptoutput)
             socketio.emit('scriptoutput', {'number': str(line)}, namespace='/test')
-            # print("emit_script output: ",line, flush=True)
         """
         # if event flag has been set by run_script thread
         # break out of while loop 
         """ 
         if event.is_set():
-            print('Event is_set')
             break
-        
-    print('Emit script ended')
 
     return
 
@@ -146,11 +127,7 @@ def emit_script(queue_in, event):
 @socketio.on('connect', namespace='/test')
 def trigger_attack():
 
-    # eventlet.monkey_patch(thread = True)
-
-    print('Client connected')
     fileName = request.args.get('file')
-    print("Filename is: ", fileName)
 
     if not fileName.endswith(".sh"):
         socketio.emit('scriptoutput', {'number': str("File selected is not an sh file. Please try again")}, namespace='/test')
@@ -164,29 +141,21 @@ def trigger_attack():
     
     # Create one thread to run subprocess to execute sh files 
     t = socketio.start_background_task(run_script, attackIOQueue, fileName, event)
-    # t = threading.Thread(target=run_script, args=(queue1, fileName, event))
-    # t.start()
 
     # Create another thread to emit output of subprocess to client browser
     t2 = socketio.start_background_task(emit_script, attackIOQueue, event)
-    # t2 = threading.Thread(target=emit_script, args=(queue1, event))
-    # t2.start()
 
     # Stop the thread once sub-process in emit_script is completed and event.set()
     t.join()
     t2.join()
 
-    print("Thread Joined")
-
     return
 
-#===============================================Get Various Statuses==================================#
+#===============================================Get Various Statuses=================================================#
 #Thread to run subprocess to get status of FW, Win Defender and Kepserver
 def get_statuses(queue_in, event):
 
     fileName = "getallstatus.sh"
-    # fileName = "homegetallstatus.sh"
-    print('Get_statuses script started')
 
     command  ='./scripts/' + fileName
     process = subprocess.Popen([command],  stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
@@ -200,42 +169,36 @@ def get_statuses(queue_in, event):
         if realtime_output == '' and process.poll() is not None:
             break
         if "Connection timed out" in realtime_output:
-            # print("Fail to get statuses")
             queue_in.put("Fail.")
             break
+         # Insert all non-empty output into realtime_output array
         if realtime_output:
-            # print(realtime_output.strip(), flush=True)
             realtime_output = realtime_output.replace('-', '')
             realtime_output = realtime_output.replace(':', '')
-            # Append ALL non-empty lines into an arraylist
             output_stringlist.append(realtime_output.strip())
     
     if output_stringlist:
-        # if output_stringlist is not empty, invoke firewall_status function
+        """
+        # If output_stringlist is not empty, invoke firewall_status function
         # to normalize data on the various statuses gathered from remote host
+        """
         output = firewall_status(output_stringlist)
         queue_in.put(output)
         queue_in.put("Ok.")
 
     sleep(3)
-
-    print("subprocess is done")
-
     event.set()
 
     return
 
 def emit_statuses(queue_in, event):
-    print('Emit statuses script started')
     while True:
         if not queue_in.empty():
             line = queue_in.get()
             # Emit to browser client where socket event listener is socket.on(statusoutput)
             socketio.emit('statusoutput', {'number': line}, namespace='/statuses')
         if event.is_set():
-            print('Event is_set')
             break
-    print('Emit script ended')
 
     return
 
@@ -256,15 +219,13 @@ def firewall_status(stringlist):
     # Convert values in stringlist array to dictionary with key-value pairs
     it = iter(stringlist)
     res_dct = dict(zip(it, it))  
-    # print (res_dct)
 
     return res_dct
 
-#Thread to get status of FW, Win Defender and Kepserver
+#Namespace to get status of FW, Win Defender and Kepserver
 @socketio.on('connect', namespace='/statuses')
 def trigger_recon():
 
-    print('Client for status connected')
     # Create event for subprocess to set event flags
     event = Event()
     # Create Queue for threads to produce into and consume from
@@ -273,21 +234,17 @@ def trigger_recon():
     # Create one thread to run subprocess to run sshpass 
     # and get various statuses of remote host
     t3 = socketio.start_background_task(get_statuses, statusIOQueue, event)
-    # t3.start()
 
     # Create another thread to emit output of subprocess to client browser
     t4 = socketio.start_background_task(emit_statuses, statusIOQueue, event)
-    # t4.start()
 
     # Stop the thread once sub-process in emit_status is completed and event.set()
     t3.join()
     t4.join()
 
-    print('Thread Joined')
-
     return
 
-# ==================Route to get .sh files for user to run in attack dashboard==============================#
+# ==================Route to get .sh files for user to run in attack dashboard===============================================#
 @app.route("/getshfiles", methods=["GET"])
 def get_sh_files():
 	listOfshFiles = get_list_of_sh_files()
@@ -320,12 +277,13 @@ def get_list_of_sh_files():
 # This route is responsible for handling .exe and .sh file uploads to the local filesystem
 @app.route('/uploadfile', methods=['GET', 'POST'])
 def file_upload():
+
     form = UploadForm()
+
     if form.validate_on_submit(): 
         # Get file upload data and its filename       
         f = form.upload.data
         filename = secure_filename(f.filename)
-        # print (filename)
 
         if filename.endswith('.exe'):
             fullFileName = os.path.join('./executables/', filename)
@@ -336,15 +294,12 @@ def file_upload():
             f.save(fullFileName)
             flash(u'.sh File has been uploaded', 'success')
         else:
-            print ("not exe or sh")
             flash(u'File submitted is not a .exe or .sh file', 'danger')
 
-        print ("File saved")
-
-    print ("Done")
-
     return render_template('uploadfile.html', form = form)
-# =====================================File Upload================================================= #
+
+
+# =====================================File Upload============================================================================ #
 # Route is responsible for getting a list of .exe files uploaded to the local file system 
 # and return it to uploadfile.html page on page load for Pen-tester to select
 @app.route("/getexefiles", methods=["GET"])
@@ -360,6 +315,7 @@ def get_list_of_exe_files():
             existing_dict[file] = []
     return existing_dict
 
+# Route is responsible for uploadig .exe files selected to the Smart Meter PC remotely
 @app.route('/remotefileupload', methods=['GET', 'POST'])
 def remote_file_upload():
     if request.method == "POST":
@@ -367,18 +323,19 @@ def remote_file_upload():
         select = request.form.get('exe-select')
         fileDirectory = request.form.get('file-directory')
         fullFileName = os.path.join('./executables/', select)
-        print(fullFileName)
+
         if not select.endswith(".exe"):
             flash(u'File selected does not end with exe', 'danger')
             return redirect(url_for('file_upload'))
-
+        """
         # If user inputs a specific file directory for file upload to the Smart Meter PC,
-        # append file directory to scp command 
+        # append file directory to scp command
+        """ 
         if fileDirectory != '':
             # strip any right trailing / or \ in directory name
             fileDirectory = fileDirectory.rstrip("\\")
             fileDirectory = fileDirectory.rstrip("/")
-            # print("stripped fileDirectory is: ", fileDirectory)
+
             # Append " and " to the directory name string for scp command
             fileDirectory = '"' +  fileDirectory.strip() + '"'
 
@@ -393,14 +350,13 @@ def remote_file_upload():
                             shell=True,
                             encoding='utf-8',
                             errors='replace')
-        print(command)
+
         while True:
             realtime_output = process.stdout.readline()
             if realtime_output == '' and process.poll() is not None:
                 flash(u'File Succesfully Uploaded to remote host', 'Success') 
                 break
             if realtime_output:
-                print(realtime_output.strip(), flush=True)
                 # if unable to upload the file to remote host, return error
                 if "No such file or directory" in realtime_output:
                     flash(u'No such file or directory', 'danger')
@@ -434,26 +390,21 @@ def remote_file_download():
         # If user inputs a speific directory for both remote and local file directory
         if (remoteFileDirectory != '' and localFileDirectory != '') :
             remoteFileDirectory = '"' +  remoteFileDirectory.strip() + '"'
-            command = baseCommand + remoteFileDirectory + ' ' + localFileDirectory
-            # print("local+remoteFileDirectory != '' command is: ", command)
-            
-
+            command = baseCommand + remoteFileDirectory + ' ' + localFileDirectory            
+        
+        # If user only inputs a specific remote file directory
         elif (remoteFileDirectory != '' or localFileDirectory != '') :
-            # If user only inputs a specific remote file directory
             if remoteFileDirectory != '':
                 remoteFileDirectory = '"' +  remoteFileDirectory.strip() + '"'
                 command = baseCommand + remoteFileDirectory + ' ' + baseLocalDirectory
-                print("RemoteFileDirectory != '' command is: ", command)
 
             # If user only inputs a specific local file directory
             if localFileDirectory != '':
                 command = baseCommand + baseRemoteDirectory + ' ' + localFileDirectory
-                print("LocalFileDirectory != '' command is: " ,command)
-            
+
+        # Default to default remote and local directory
         else:
-            # Default to default remote and local directory
             command =  baseCommand + baseRemoteDirectory + ' ' + baseLocalDirectory
-            print("default command is: ", command)
 
         # run scp command using popen and upload the file to the remote system
         process = subprocess.Popen([command],  stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
@@ -466,16 +417,13 @@ def remote_file_download():
                 flash(u'Files has been successfully copied to local folder: ', 'success')
                 break
             if realtime_output:
-                # print(realtime_output.strip(), flush=True)
-                # If unable to connect to remote host or upload the fsile, return error
-                print(realtime_output, flush = True)
+                # If unable to connect to remote host or upload the file due to non-existent library, return error
                 if "No such file or directory" in realtime_output:
                     flash(u'No such file or directory on remote host', 'danger')
                     break
                 elif "Connection timed out" in realtime_output:
                     flash(u'Unable to connect to remote host, connection timed out', 'danger')
                     break
-            
 
     return render_template('remotefiledownload.html')
 

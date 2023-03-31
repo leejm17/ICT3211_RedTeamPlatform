@@ -1,0 +1,89 @@
+cd /root/itp/secondredteamcode/venv/
+source bin/activate
+python -m flask run
+ 	
+Get Firewall Status
+Get Windows Defender Status
+Get Kepserver Status
+
+
+1 Delete file (not tested)
+2 Copy file (Ok.)
+3 dsiable firewall (ok)
+4 disable ssh (fix/not fixed but Ok)
+5 kep server service (ok)
+6 interrupt modbus - (fix/notfixed)(Ok with issues)
+7 disable comport (ok, need ouput success)  
+8 ransomware (ok, but need ouput success)
+9 change meter id (ok)  
+
+12bruteforce-kepserver service must be up (prints ok)
+
+10 1: Re-enable FW 
+10 2: Re-enable SSH Rule
+10 3: Revert Kepex Service (Ok)
+10 4: Renable (Hardcoded) COM Port 
+10 5: Revert ransomeware?
+10 6: Rewrite Meter ID from 26 back to 25 (Ok)
+
+{'antivirusenabled': 'true', 'status': 'running', 'domainprofilesettings': 'on', 'privateprofilesettings': 'on', 'publicprofilesettings': 'on'}
+
+
+batchfile deletes logs from folder 
+
+To copy the entire revenge directory from your deathstar.com account to your empire.gov account, enter:
+scp -r dvader@deathstar.com:~/revenge ~/revenge
+
+
+sshpass -p "Student12345@" scp -r student@172.16.2.223:"C:\Users\Student\Documents\AttackFolder" ~/root/testdownload
+
+====================================
+#https://stackoverflow.com/questions/1534210/use-different-python-version-with-virtualenv
+# https://stackoverflow.com/questions/70422866/how-to-create-a-venv-with-a-different-python-version
+apt install sshpass
+
+apt install python3-virtualenv
+sudo add-apt-repository ppa:deadsnakes/ppa
+apt install python3.8
+virtualenv --python="/usr/bin/python3.8" venv
+
+pip install flask
+pip install flask-socketio
+pip install Flask-WTF
+#pip install eventlet
+
+=====================================================================================================
+createdir no success
+recon no success
+
+
+Introduction with project title
+background / Motivation 
+
+brief descriptoin of the 2 solutions to our
+link solutions to topology
+explain activity diag
+key feafures of both solutions (split) 
+
+Future enhancmenets 
+
+helvectica ligth
+
+retake bruteforce screenshot
+retake changemeterid
+retake reconscript
+retake comport
+
+
+code todo
+----------------
+-remove debug statements
+-redo requirements.txt
+
+
+report todo
+-----------------------
+-Do figures 
+-cite figure
+-references
+
