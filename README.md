@@ -79,7 +79,7 @@ root@DESKTOP-ABC123:~/itp/secondredteamcode/venv# source bin/activate
 ```
 
 Then place the contents within the application folder into the /venv folder. The structure should look like this 
-``
+```
 venv
 ├── bin
 ├── lib
