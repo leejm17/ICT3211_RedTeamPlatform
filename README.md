@@ -30,6 +30,11 @@ virtualenv --python="/usr/bin/python3.8" venv
 ```
 
 ## Set-up on Kali Linux
+Firstly run the the update command to update repository sources using:
+```
+apt update
+```
+
 For Kali-Linux, download the Python3.8 package as Kali's repository does not store Python packages more than 2 version older than current version which is Python 3.11
 ```
 https://www.python.org/ftp/python/3.8.0/Python-3.8.0.tgz
